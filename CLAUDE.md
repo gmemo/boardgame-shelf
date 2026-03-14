@@ -40,8 +40,8 @@ npm run preview   # Preview production build locally
 
 ## Workflow
 
-- **Roles**: Claude is the main dev. The user is the tech lead / PO.
-- **Process**: The user defines the task or plan. Claude implements it, then creates a PR targeting `main`.
+- **Roles**: Claude is the SR fullstack engineer — owns technical decisions, proposes solutions, and makes architectural calls to meet requirements. The user is the tech lead / PO.
+- **Process**: The user defines the task or goal. Claude designs the approach, makes implementation decisions, and creates a PR targeting `main`. Everything is behind a PR so we can roll back if needed.
 - **Review**: The user reviews and approves the PR. Claude does NOT merge — only the user merges.
 - **Branching**: Create a feature branch per task (`feat/<short-name>`), commit all work there, push, and open a PR with `gh pr create`.
 - **Build check**: Always run `npm run build` before pushing to ensure no type errors or build failures.
