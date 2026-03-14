@@ -1,0 +1,45 @@
+# CLAUDE.md
+
+## Project Overview
+
+Boardgame Shelf — a web-first PWA for managing a board game collection, logging play sessions, tracking players, and viewing gaming stats. All data is local (IndexedDB), no backend.
+
+## Commands
+
+```bash
+npm run dev       # Start dev server (Vite, port 5173)
+npm run build     # TypeScript type-check + Vite production build
+npm run lint      # ESLint
+npm run preview   # Preview production build locally
+```
+
+## Architecture
+
+- **Routing**: React Router 7 with 4 tabs (Collection `/`, Plays `/plays`, Stats `/stats`, Settings `/settings`) + Welcome screen (`/welcome`, first launch only)
+- **State**: Zustand stores with `persist` middleware backed by IndexedDB (via `idb-keyval` and custom `idb-storage.ts` adapter)
+- **Styling**: Tailwind CSS 4 with CSS custom properties for theming. Theme variables defined in `src/index.css`. Dark/light mode via `data-theme` attribute on `<html>`, accent colors via `data-accent` attribute. Glass morphism effects throughout.
+- **Components**: Radix UI headless primitives wrapped in `src/components/ui/`. Custom components in `src/components/`.
+- **Animations**: Framer Motion 12 — page transitions, card interactions, list stagger
+- **PWA**: `vite-plugin-pwa` with Workbox precaching. Manifest configured in `vite.config.ts`.
+- **IDs**: Generated with `crypto.randomUUID()`
+
+## Key Types (src/types/index.ts)
+
+- `BoardGame` — name, player range, play time, category, complexity (1-5), rating, favorite flag
+- `Player` — name, color
+- `PlaySession` — linked to gameId, playerIds, winnerId, scores, duration, date
+- `UserPreferences` — theme, accent color, hasSeenWelcome
+
+## Conventions
+
+- Pages live in `src/app/<route>/page.tsx`
+- Reusable UI primitives in `src/components/ui/`
+- Feature components directly in `src/components/`
+- Business logic and utilities in `src/lib/`
+- All stores exported via barrel `src/stores/index.ts`
+
+## Deployment
+
+- Hosted on Vercel as static SPA
+- `vercel.json` rewrites all routes to `index.html`
+- Build output: `dist/`
