@@ -1,29 +1,32 @@
+export interface Tag {
+  id: string;
+  name: string;
+  type: 'system' | 'default' | 'custom';
+}
+
+export interface Expansion {
+  id: string;
+  name: string;
+  owned: boolean;
+}
+
 export interface BoardGame {
   id: string;
   name: string;
+  description: string;
   minPlayers: number;
   maxPlayers: number;
   playTimeMinutes: number;
-  category: GameCategory;
   complexity: 1 | 2 | 3 | 4 | 5;
   rating: number | null;
   imageUrl: string | null;
   notes: string;
-  favorite: boolean;
+  quickRulesNotes: string;
+  tagIds: string[];
+  expansions: Expansion[];
   createdAt: string;
+  updatedAt: string;
 }
-
-export type GameCategory =
-  | 'strategy'
-  | 'party'
-  | 'cooperative'
-  | 'deckbuilder'
-  | 'worker-placement'
-  | 'area-control'
-  | 'dice'
-  | 'card'
-  | 'family'
-  | 'other';
 
 export interface Player {
   id: string;

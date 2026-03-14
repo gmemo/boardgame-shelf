@@ -6,6 +6,9 @@ import PlaysPage from './app/plays/page';
 import StatsPage from './app/stats/page';
 import SettingsPage from './app/settings/page';
 import WelcomePage from './app/welcome/page';
+import GameDetailPage from './app/game/page';
+import GameNewPage from './app/game/new/page';
+import GameEditPage from './app/game/edit/page';
 
 function AppRoutes() {
   const { preferences } = usePreferencesStore();
@@ -27,6 +30,9 @@ function AppRoutes() {
         <Route path="/stats" element={<StatsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
+      <Route path="/game/new" element={<GameNewPage />} />
+      <Route path="/game/:id" element={<GameDetailPage />} />
+      <Route path="/game/:id/edit" element={<GameEditPage />} />
       <Route path="/welcome" element={<Navigate to="/" replace />} />
     </Routes>
   );
