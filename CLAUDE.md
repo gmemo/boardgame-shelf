@@ -38,8 +38,17 @@ npm run preview   # Preview production build locally
 - Business logic and utilities in `src/lib/`
 - All stores exported via barrel `src/stores/index.ts`
 
+## Workflow
+
+- **Roles**: Claude is the main dev. The user is the tech lead / PO.
+- **Process**: The user defines the task or plan. Claude implements it, then creates a PR targeting `main`.
+- **Review**: The user reviews and approves the PR. Claude does NOT merge — only the user merges.
+- **Branching**: Create a feature branch per task (`feat/<short-name>`), commit all work there, push, and open a PR with `gh pr create`.
+- **Build check**: Always run `npm run build` before pushing to ensure no type errors or build failures.
+- **Autonomy**: Claude should work autonomously in the background and notify the user when the PR is ready for review.
+
 ## Deployment
 
-- Hosted on Vercel as static SPA
+- Hosted on Vercel as static SPA, auto-deploys on merge to `main`
 - `vercel.json` rewrites all routes to `index.html`
 - Build output: `dist/`
