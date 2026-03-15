@@ -44,9 +44,9 @@ export default function GameDetail({ game }: GameDetailProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.96 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+      initial={{ opacity: 0, scale: 0.82, y: 40 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 28 }}
       className="flex flex-col h-full bg-background"
     >
       <div className="ambient-glow" />
