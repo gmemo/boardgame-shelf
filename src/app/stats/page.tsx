@@ -1,8 +1,12 @@
 export default function StatsPage() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4 pt-[max(0rem,calc(env(safe-area-inset-top)-1rem))]">Stats</h1>
-      <p className="text-text-secondary">Your gaming statistics will appear here.</p>
+    <div className="flex flex-col h-full">
+      <div className="sticky top-0 z-10 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3 bg-gradient-to-b from-background from-60% to-transparent">
+        <h1 className="text-xl font-bold text-text-primary">Stats</h1>
+      </div>
+      <div className="flex-1 p-4">
+        <p className="text-text-secondary">Your gaming statistics will appear here.</p>
+      </div>
     </div>
   );
 }

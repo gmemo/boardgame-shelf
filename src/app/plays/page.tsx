@@ -27,12 +27,20 @@ export default function PlaysPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-5 bg-gradient-to-b from-background from-60% to-transparent">
+      <div className="sticky top-0 z-10 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3 bg-gradient-to-b from-background from-60% to-transparent">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Plays</h1>
-          <span className="text-xs text-text-secondary">
-            {playLogs.length} play{playLogs.length !== 1 ? 's' : ''}
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-xs text-text-secondary">
+              {playLogs.length} play{playLogs.length !== 1 ? 's' : ''}
+            </span>
+            <button
+              onClick={() => navigate('/plays/log')}
+              className="flex items-center justify-center w-9 h-9 rounded-full glass-pill text-text-secondary hover:text-primary transition-colors"
+            >
+              <Plus size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -62,13 +70,6 @@ export default function PlaysPage() {
         )}
       </div>
 
-      {/* FAB */}
-      <button
-        onClick={() => navigate('/plays/log')}
-        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center fab-halo active:scale-90 transition-all z-10"
-      >
-        <Plus size={24} />
-      </button>
     </div>
   );
 }
