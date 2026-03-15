@@ -211,19 +211,17 @@ export default function SettingsPage() {
         <section className="glass rounded-2xl p-4 space-y-4">
           <h2 className="text-sm font-semibold text-text-primary">About</h2>
           <p className="text-sm text-text-primary leading-relaxed">
-            Hey! I'm a board gamer just like you. I built Meeply because I was
-            tired of forgetting which games I own, losing track of who won last
-            time, and spending 20 minutes deciding what to play.
+            I built Meeply because my game nights had a problem: I'd forget
+            which games I own, nobody could remember who won last time, and
+            picking what to play took longer than actually playing.
           </p>
           <p className="text-sm text-text-primary leading-relaxed">
-            I made it offline-first because your game shelf shouldn't need an
-            internet connection — it's your data, on your device, always
-            available.
+            So I made this — a dead-simple app that lives on your phone, works
+            offline, and doesn't need you to create yet another account.
           </p>
           <p className="text-sm text-text-primary leading-relaxed">
-            If Meeply makes your game nights a little better and you'd like to
-            support the project, a coffee (or a new sleeve of card sleeves)
-            would mean a lot!
+            If Meeply saves your group from the "what should we play" spiral,
+            consider buying me a coffee (or a new set of dice).
           </p>
           <div className="flex gap-3">
             <a
