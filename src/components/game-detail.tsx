@@ -52,7 +52,7 @@ export default function GameDetail({ game }: GameDetailProps) {
       <div className="ambient-glow" />
 
       {/* Top action bar */}
-      <div className="flex items-center justify-between p-3 relative z-10">
+      <div className="flex items-center justify-between px-3 pt-4 pb-2 relative z-10">
         <IconButton onClick={() => navigate(-1)}>
           <ChevronLeft size={24} />
         </IconButton>
