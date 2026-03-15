@@ -55,7 +55,7 @@ export default function GamePicker({ open, onClose, onSelect }: GamePickerProps)
 
             {/* Search */}
             <div className="px-4 pb-3">
-              <div className="flex items-center gap-2 rounded-xl bg-surface px-3 py-2.5 border border-border">
+              <div className="flex items-center gap-2 rounded-xl glass-input px-3 py-2.5">
                 <Search size={16} className="text-text-secondary" />
                 <input
                   type="text"

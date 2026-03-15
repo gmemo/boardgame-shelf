@@ -65,7 +65,7 @@ export default function TagPicker({ selectedIds, onChange }: TagPickerProps) {
                 onClick={() => toggle(tag.id)}
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-all active:scale-95 ${
                   selected
-                    ? 'bg-primary text-white'
+                    ? 'bg-primary text-white tag-glow'
                     : 'glass-pill text-text-secondary'
                 }`}
               >

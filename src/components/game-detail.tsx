@@ -43,6 +43,7 @@ export default function GameDetail({ game }: GameDetailProps) {
 
   return (
     <div className="flex flex-col h-full bg-background">
+      <div className="ambient-glow" />
       {/* Hero / Header */}
       <div className="relative">
         {game.imageUrl ? (
@@ -88,7 +89,7 @@ export default function GameDetail({ game }: GameDetailProps) {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto -mt-8 relative z-10">
+      <div className="flex-1 overflow-y-auto -mt-8 relative z-[1]">
         <div className="flex flex-col gap-5 p-4 pb-24">
           {/* Title + Rating */}
           <div>

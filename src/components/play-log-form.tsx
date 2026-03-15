@@ -72,6 +72,7 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
 
   return (
     <div className="flex flex-col h-full bg-background">
+      <div className="ambient-glow" />
       {/* Header */}
       <div className="glass-strong px-4 py-3 flex items-center gap-3">
         <button onClick={handleBack} className="text-text-secondary">
@@ -139,7 +140,7 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
                     placeholder={`Player ${i + 1}`}
                     value={name}
                     onChange={(e) => updatePlayer(i, e.target.value)}
-                    className="flex-1 rounded-xl bg-surface px-4 py-3 text-sm text-text-primary border border-border placeholder:text-text-secondary/50 focus:outline-none focus:border-primary transition-colors"
+                    className="flex-1 rounded-xl glass-input px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none transition-colors"
                   />
                   {playerNames.length > 1 && (
                     <button
@@ -170,7 +171,7 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
                   onClick={() => setWinnerName(null)}
                   className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                     winnerName === null
-                      ? 'bg-primary text-white'
+                      ? 'bg-primary text-white tag-glow'
                       : 'glass-pill text-text-secondary'
                   }`}
                 >
@@ -182,7 +183,7 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
                     onClick={() => setWinnerName(name)}
                     className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
                       winnerName === name
-                        ? 'bg-primary text-white'
+                        ? 'bg-primary text-white tag-glow'
                         : 'glass-pill text-text-secondary'
                     }`}
                   >

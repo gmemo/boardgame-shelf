@@ -5,15 +5,23 @@ interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
+  autoFocus?: boolean;
 }
 
-export default function SearchBar({ value, onChange, placeholder = 'Search games...' }: SearchBarProps) {
+export default function SearchBar({ value, onChange, placeholder = 'Search games...', autoFocus }: SearchBarProps) {
   const [local, setLocal] = useState(value);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setLocal(value);
   }, [value]);
+
+  useEffect(() => {
+    if (autoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [autoFocus]);
 
   const handleChange = (v: string) => {
     setLocal(v);
@@ -30,11 +38,12 @@ export default function SearchBar({ value, onChange, placeholder = 'Search games
     <div className="relative">
       <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary/50" />
       <input
+        ref={inputRef}
         type="text"
         value={local}
         onChange={(e) => handleChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-xl bg-surface pl-10 pr-10 py-2.5 text-sm text-text-primary border border-border placeholder:text-text-secondary/50 focus:outline-none focus:border-primary transition-colors"
+        className="w-full rounded-xl glass-input pl-10 pr-10 py-2.5 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none transition-colors"
       />
       {local && (
         <button

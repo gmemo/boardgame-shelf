@@ -29,7 +29,7 @@ export default function SettingsPage() {
               onClick={() => setPreferences({ notPlayedRecentlyDays: preset.value })}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-all flex-1 ${
                 preferences.notPlayedRecentlyDays === preset.value
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-white tag-glow'
                   : 'glass-pill text-text-secondary'
               }`}
             >
