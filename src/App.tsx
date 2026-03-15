@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { usePreferencesStore } from './stores';
 import Layout from './app/layout';
@@ -12,8 +13,24 @@ import GameEditPage from './app/game/edit/page';
 import LogPlayPage from './app/plays/log/page';
 import GameLogPlayPage from './app/game/log-play/page';
 
+function useApplyTheme() {
+  const { preferences } = usePreferencesStore();
+
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute('data-theme', preferences.theme);
+    root.setAttribute('data-accent', preferences.accentColor);
+
+    const themeColor = preferences.theme === 'dark' ? '#09090B' : '#FAFAFA';
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute('content', themeColor);
+  }, [preferences.theme, preferences.accentColor]);
+}
+
 function AppRoutes() {
   const { preferences } = usePreferencesStore();
+  useApplyTheme();
 
   if (!preferences.hasSeenWelcome) {
     return (

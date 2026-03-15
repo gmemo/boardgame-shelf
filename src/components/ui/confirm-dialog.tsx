@@ -7,6 +7,7 @@ interface ConfirmDialogProps {
   title: string;
   description: string;
   confirmLabel?: string;
+  confirmVariant?: 'primary' | 'danger';
   onConfirm: () => void;
 }
 
@@ -16,6 +17,7 @@ export default function ConfirmDialog({
   title,
   description,
   confirmLabel = 'Delete',
+  confirmVariant = 'danger',
   onConfirm,
 }: ConfirmDialogProps) {
   return (
@@ -38,7 +40,7 @@ export default function ConfirmDialog({
               Cancel
             </Button>
             <Button
-              variant="danger"
+              variant={confirmVariant}
               className="flex-1"
               onClick={() => {
                 onConfirm();

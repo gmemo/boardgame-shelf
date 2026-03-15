@@ -9,6 +9,7 @@ interface PlayLogState {
   playLogs: PlayLog[];
   addPlayLog: (log: Omit<PlayLog, 'id' | 'createdAt'>) => PlayLog;
   deletePlayLog: (id: string) => void;
+  setPlayLogs: (playLogs: PlayLog[]) => void;
 }
 
 export const usePlayLogStore = create<PlayLogState>()(
@@ -37,6 +38,7 @@ export const usePlayLogStore = create<PlayLogState>()(
       deletePlayLog: (id) => {
         set((state) => ({ playLogs: state.playLogs.filter((l) => l.id !== id) }));
       },
+      setPlayLogs: (playLogs) => set({ playLogs }),
     }),
     {
       name: 'bg-shelf-play-logs',

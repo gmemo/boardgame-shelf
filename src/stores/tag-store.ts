@@ -37,6 +37,7 @@ interface TagState {
   addTag: (name: string, type: 'default' | 'custom') => Tag;
   updateTag: (id: string, name: string) => void;
   deleteTag: (id: string) => void;
+  setTags: (tags: Tag[]) => void;
 }
 
 export const useTagStore = create<TagState>()(
@@ -66,6 +67,7 @@ export const useTagStore = create<TagState>()(
           tags: state.tags.filter((t) => t.id !== id),
         }));
       },
+      setTags: (tags) => set({ tags }),
     }),
     {
       name: 'bg-shelf-tags',
