@@ -51,7 +51,7 @@ export default function BottomNav() {
   // Auto-focus input when search opens
   useEffect(() => {
     if (isSearchOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
+      setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [isSearchOpen]);
 
@@ -84,16 +84,24 @@ export default function BottomNav() {
         )}
       </AnimatePresence>
 
-      {/* Bottom Nav */}
-      <nav className="fixed bottom-0 left-4 right-4 mb-[max(0.75rem,env(safe-area-inset-bottom))] z-50 glass-strong rounded-2xl h-14 flex items-center nav-glow overflow-hidden">
-        {/* Tabs layer — always mounted, fades out when search is active */}
-        <motion.div
-          animate={{ opacity: searchActive ? 0 : 1 }}
-          transition={{ duration: 0.15 }}
-          className={`flex items-center w-full h-full ${searchActive ? 'pointer-events-none' : ''}`}
+      {/* Bottom bar — flex container with nav pill + search area */}
+      <div className="fixed bottom-0 left-4 right-4 mb-[max(0.75rem,env(safe-area-inset-bottom))] z-50 flex items-center gap-2 h-14">
+
+        {/* Nav pill — shrinks to home button when search is active */}
+        <motion.nav
+          animate={{
+            flexGrow: searchActive ? 0 : 1,
+            flexBasis: searchActive ? 52 : 0,
+          }}
+          transition={spring}
+          className="glass-strong rounded-2xl h-full nav-glow overflow-hidden flex items-center relative shrink-0"
         >
-          {/* Tabs — always offset right to reserve space for search button */}
-          <div className="flex items-center justify-around flex-1 pr-12">
+          {/* Tabs — fade out when search active */}
+          <motion.div
+            animate={{ opacity: searchActive ? 0 : 1 }}
+            transition={{ duration: 0.12 }}
+            className={`flex items-center justify-around w-full h-full ${searchActive ? 'pointer-events-none' : ''}`}
+          >
             {tabs.map(({ path, label, icon: Icon }) => {
               const active = location.pathname === path;
               return (
@@ -103,7 +111,7 @@ export default function BottomNav() {
                     setActiveTab(path);
                     navigate(path);
                   }}
-                  className={`flex flex-col items-center gap-0.5 px-3 py-2 transition-colors ${
+                  className={`flex flex-col items-center gap-0.5 px-3 py-2 transition-colors whitespace-nowrap ${
                     active ? 'text-primary' : 'text-text-secondary'
                   }`}
                 >
@@ -112,59 +120,78 @@ export default function BottomNav() {
                 </button>
               );
             })}
-          </div>
+          </motion.div>
 
-          {/* Search button — fixed right slot, only visible on collection */}
-          <div className="absolute right-2 top-1/2 -translate-y-1/2">
-            {isCollectionTab && (
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="relative flex items-center justify-center w-10 h-10 rounded-full glass-pill text-text-secondary hover:text-primary transition-colors active:scale-90"
-              >
-                <Search size={18} strokeWidth={1.5} />
-                {hasActiveFilters && (
-                  <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-primary" />
-                )}
-              </button>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Search layer — always mounted when on collection, fades in when active */}
-        {isCollectionTab && (
+          {/* Home button — fade in when search active */}
           <motion.div
             animate={{ opacity: searchActive ? 1 : 0 }}
-            transition={{ duration: 0.15 }}
-            className={`absolute inset-0 flex items-center gap-2 px-3 ${!searchActive ? 'pointer-events-none' : ''}`}
+            transition={{ duration: 0.12 }}
+            className={`absolute inset-0 flex items-center justify-center ${!searchActive ? 'pointer-events-none' : ''}`}
           >
             <button
               onClick={() => closeSearch()}
-              className="shrink-0 flex items-center justify-center w-9 h-9 rounded-xl text-primary active:scale-90 transition-transform"
+              className="flex items-center justify-center w-full h-full text-primary active:scale-90 transition-transform"
             >
               <Home size={20} strokeWidth={2} />
             </button>
-            <div className="flex-1 flex items-center gap-2 rounded-xl glass-input px-3 py-2">
-              <Search size={16} className="text-text-secondary/50 shrink-0" />
-              <input
-                ref={inputRef}
-                type="text"
-                value={localSearch}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                placeholder="Search games..."
-                className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none min-w-0"
-              />
-              {localSearch && (
-                <button
-                  onClick={clearSearch}
-                  className="text-text-secondary hover:text-text-primary transition-colors shrink-0"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
           </motion.div>
-        )}
-      </nav>
+        </motion.nav>
+
+        {/* Search area — stretches from button to full bar, smoothly collapses to 0 on non-collection tabs */}
+        <motion.div
+          animate={{
+            flexGrow: searchActive ? 1 : 0,
+            flexBasis: searchActive ? 0 : (isCollectionTab ? 48 : 0),
+            marginLeft: isCollectionTab || searchActive ? 0 : -8,
+          }}
+          transition={spring}
+          className="h-full overflow-hidden flex items-center shrink-0"
+        >
+          {/* Search button — visible when collapsed on collection tab */}
+          <motion.div
+            animate={{ opacity: searchActive ? 0 : 1 }}
+            transition={{ duration: 0.12 }}
+            className={`absolute flex items-center justify-center w-12 h-12 ${searchActive ? 'pointer-events-none' : ''}`}
+          >
+            {isCollectionTab && (
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="relative flex items-center justify-center w-12 h-12 rounded-full glass-pill text-text-secondary hover:text-primary transition-colors active:scale-90"
+              >
+                <Search size={18} strokeWidth={1.5} />
+                {hasActiveFilters && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" />
+                )}
+              </button>
+            )}
+          </motion.div>
+
+          {/* Search input bar — visible when expanded */}
+          <motion.div
+            animate={{ opacity: searchActive ? 1 : 0 }}
+            transition={{ duration: 0.15, delay: searchActive ? 0.08 : 0 }}
+            className={`glass-strong rounded-2xl w-full h-full flex items-center gap-2 px-3 ${!searchActive ? 'pointer-events-none' : ''}`}
+          >
+            <Search size={16} className="text-text-secondary/50 shrink-0" />
+            <input
+              ref={inputRef}
+              type="text"
+              value={localSearch}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search games..."
+              className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none min-w-0"
+            />
+            {localSearch && (
+              <button
+                onClick={clearSearch}
+                className="text-text-secondary hover:text-text-primary transition-colors shrink-0"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </motion.div>
+        </motion.div>
+      </div>
     </>
   );
 }
