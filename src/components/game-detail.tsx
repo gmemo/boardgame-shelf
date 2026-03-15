@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle } from 'lucide-react';
+import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, CalendarPlus } from 'lucide-react';
 import type { BoardGame } from '../types';
-import { useGameStore, useTagStore, SYSTEM_TAG_IDS } from '../stores';
+import { useGameStore, useTagStore, usePlayLogStore, SYSTEM_TAG_IDS } from '../stores';
 import IconButton from './ui/icon-button';
 import Badge from './ui/badge';
 import StarRating from './ui/star-rating';
 import ComplexityDots from './ui/complexity-dots';
 import ConfirmDialog from './ui/confirm-dialog';
+import Button from './ui/button';
+import PlayLogEntry from './play-log-entry';
 
 interface GameDetailProps {
   game: BoardGame;
@@ -17,6 +19,7 @@ export default function GameDetail({ game }: GameDetailProps) {
   const navigate = useNavigate();
   const { deleteGame } = useGameStore();
   const { tags } = useTagStore();
+  const { playLogs } = usePlayLogStore();
   const [showDelete, setShowDelete] = useState(false);
 
   const gameTags = game.tagIds
@@ -25,6 +28,13 @@ export default function GameDetail({ game }: GameDetailProps) {
     .filter(Boolean);
 
   const isFavorite = game.tagIds.includes(SYSTEM_TAG_IDS.FAVORITE);
+
+  const recentPlays = useMemo(() => {
+    return playLogs
+      .filter((l) => l.gameId === game.id)
+      .sort((a, b) => b.date.localeCompare(a.date))
+      .slice(0, 5);
+  }, [playLogs, game.id]);
 
   const handleDelete = () => {
     deleteGame(game.id);
@@ -114,6 +124,15 @@ export default function GameDetail({ game }: GameDetailProps) {
             </div>
           </div>
 
+          {/* Log Play Button */}
+          <Button
+            onClick={() => navigate(`/game/${game.id}/log-play`)}
+            className="w-full"
+          >
+            <CalendarPlus size={18} />
+            Log Play
+          </Button>
+
           {/* Tags */}
           {gameTags.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
@@ -185,6 +204,18 @@ export default function GameDetail({ game }: GameDetailProps) {
               <p className="text-sm text-text-secondary whitespace-pre-wrap">
                 {game.notes}
               </p>
+            </div>
+          )}
+
+          {/* Recent Plays */}
+          {recentPlays.length > 0 && (
+            <div>
+              <h2 className="text-sm font-semibold text-text-primary mb-3">Recent Plays</h2>
+              <div className="flex flex-col gap-2">
+                {recentPlays.map((log) => (
+                  <PlayLogEntry key={log.id} log={log} showGameName={false} />
+                ))}
+              </div>
             </div>
           )}
         </div>

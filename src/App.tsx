@@ -9,6 +9,8 @@ import WelcomePage from './app/welcome/page';
 import GameDetailPage from './app/game/page';
 import GameNewPage from './app/game/new/page';
 import GameEditPage from './app/game/edit/page';
+import LogPlayPage from './app/plays/log/page';
+import GameLogPlayPage from './app/game/log-play/page';
 
 function AppRoutes() {
   const { preferences } = usePreferencesStore();
@@ -33,6 +35,8 @@ function AppRoutes() {
       <Route path="/game/new" element={<GameNewPage />} />
       <Route path="/game/:id" element={<GameDetailPage />} />
       <Route path="/game/:id/edit" element={<GameEditPage />} />
+      <Route path="/game/:id/log-play" element={<GameLogPlayPage />} />
+      <Route path="/plays/log" element={<LogPlayPage />} />
       <Route path="/welcome" element={<Navigate to="/" replace />} />
     </Routes>
   );
