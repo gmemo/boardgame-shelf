@@ -54,13 +54,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-4 pb-8">
+    <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3 bg-gradient-to-b from-background from-60% to-transparent">
+      <div className="sticky top-0 z-10 px-4 pt-4 pb-3 bg-gradient-to-b from-background from-60% to-transparent">
         <h1 className="text-xl font-bold text-text-primary">Settings</h1>
       </div>
 
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 px-4 pb-8">
         {/* Appearance */}
         <section className="glass rounded-2xl p-4">
           <h2 className="text-sm font-semibold text-text-primary mb-4">
