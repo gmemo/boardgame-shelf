@@ -31,7 +31,7 @@ export default function GameCard({ game }: GameCardProps) {
       className="glass rounded-2xl overflow-hidden text-left transition-all active:scale-[0.97] card-active-glow depth-1 flex flex-col"
     >
       {/* Image */}
-      <div className="relative aspect-[3/2] bg-surface">
+      <div className="relative aspect-[3/2] max-h-32 bg-surface overflow-hidden">
         {game.imageUrl ? (
           <img
             src={game.imageUrl}
