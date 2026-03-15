@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Moon, Sun, Download, Upload, Check } from 'lucide-react';
+import { Moon, Sun, Download, Upload, Check, Heart, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePreferencesStore } from '../../stores';
 import ToggleGroup from '../../components/ui/toggle-group';
@@ -56,7 +56,7 @@ export default function SettingsPage() {
   return (
     <div className="p-4 pb-8">
       {/* Header */}
-      <div className="sticky top-0 z-10 pt-2 pb-4 bg-gradient-to-b from-background from-60% to-transparent">
+      <div className="sticky top-0 z-10 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-4 bg-gradient-to-b from-background from-60% to-transparent">
         <h1 className="text-2xl font-bold text-text-primary">Settings</h1>
       </div>
 
@@ -179,20 +179,82 @@ export default function SettingsPage() {
           )}
         </section>
 
-        {/* About */}
-        <section className="glass-light depth-1 rounded-2xl p-4">
-          <h2 className="text-sm font-semibold text-text-primary mb-2">
-            About
-          </h2>
-          <p className="text-sm text-text-secondary">
-            <span className="font-medium text-text-primary">Meeply</span>{' '}
-            v0.1.0
-          </p>
-          <p className="text-xs text-text-secondary mt-2 leading-relaxed">
-            All data stays on your device — no accounts, no cloud, no tracking.
-            Built with love for board game nights.
-          </p>
+        {/* Coming Soon */}
+        <section className="glass rounded-2xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Sparkles size={16} className="text-primary" />
+            <h2 className="text-sm font-semibold text-text-primary">
+              Coming Soon
+            </h2>
+          </div>
+          <ul className="space-y-2 text-sm text-text-secondary">
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-0.5">&#8226;</span>
+              Player profiles with avatars and win/loss stats
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-0.5">&#8226;</span>
+              Game night planner with smart suggestions
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-0.5">&#8226;</span>
+              Charts and insights in the stats tab
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-0.5">&#8226;</span>
+              BGG import to quickly populate your collection
+            </li>
+          </ul>
         </section>
+
+        {/* About + Support */}
+        <section className="glass rounded-2xl p-4 space-y-4">
+          <h2 className="text-sm font-semibold text-text-primary">About</h2>
+          <p className="text-sm text-text-primary leading-relaxed">
+            Hey! I'm a board gamer just like you. I built Meeply because I was
+            tired of forgetting which games I own, losing track of who won last
+            time, and spending 20 minutes deciding what to play.
+          </p>
+          <p className="text-sm text-text-primary leading-relaxed">
+            I made it offline-first because your game shelf shouldn't need an
+            internet connection — it's your data, on your device, always
+            available.
+          </p>
+          <p className="text-sm text-text-primary leading-relaxed">
+            If Meeply makes your game nights a little better and you'd like to
+            support the project, a coffee (or a new sleeve of card sleeves)
+            would mean a lot!
+          </p>
+          <div className="flex gap-3">
+            <a
+              href="https://ko-fi.com/U7U41MX9IQ"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#FF5E5B] py-3 text-white text-sm font-semibold active:scale-95 transition-transform"
+            >
+              <Heart size={16} />
+              Ko-fi
+            </a>
+            <a
+              href="https://www.paypal.com/paypalme/GuillermoSerrano775"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-[#0070BA] py-3 text-white text-sm font-semibold active:scale-95 transition-transform"
+            >
+              PayPal
+            </a>
+          </div>
+        </section>
+
+        {/* Privacy + Version */}
+        <div className="glass-light rounded-2xl p-4">
+          <p className="text-xs text-text-secondary text-center leading-relaxed">
+            All data stays on your device — no accounts, no cloud, no tracking.
+          </p>
+        </div>
+        <p className="text-xs text-text-secondary text-center pb-2">
+          Meeply v0.1.0
+        </p>
       </div>
 
       <ConfirmDialog
