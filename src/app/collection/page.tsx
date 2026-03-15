@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Plus, Library, ArrowUpDown, Dices } from 'lucide-react';
 import { useCollectionFilter, type SortField } from '../../lib/use-collection-filter';
-import { useCollectionFilterStore } from '../../stores';
 import GameCard from '../../components/game-card';
 import Button from '../../components/ui/button';
 import EmptyState from '../../components/ui/empty-state';
@@ -28,7 +27,6 @@ export default function CollectionPage() {
     hasActiveFilters,
     filteredGames,
   } = useCollectionFilter();
-  const { isSearchOpen } = useCollectionFilterStore();
   const [showSort, setShowSort] = useState(false);
   const [showNightPicker, setShowNightPicker] = useState(false);
 
@@ -62,26 +60,18 @@ export default function CollectionPage() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header — title + count + sort only */}
-      <div className="sticky top-0 z-10 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-5 bg-gradient-to-b from-background from-60% to-transparent">
+      {/* Header — title + actions */}
+      <div className="sticky top-0 z-10 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3 bg-gradient-to-b from-background from-60% to-transparent">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Collection</h1>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setShowNightPicker(true)}
-              className="flex items-center gap-1 text-primary hover:text-primary-dark transition-colors"
-              title="Game Night"
-            >
-              <Dices size={18} />
-            </button>
+          <div className="flex items-center gap-3">
             <span className="text-xs text-text-secondary">{filteredGames.length} games</span>
             <div className="relative">
               <button
                 onClick={() => setShowSort(!showSort)}
-                className="flex items-center gap-1 text-text-secondary hover:text-text-primary transition-colors text-xs"
+                className="flex items-center justify-center w-9 h-9 rounded-full glass-pill text-text-secondary hover:text-text-primary transition-colors"
               >
-                <ArrowUpDown size={14} />
-                {SORT_OPTIONS.find((o) => o.value === filters.sortBy)?.label}
+                <ArrowUpDown size={18} />
               </button>
               {showSort && (
                 <>
@@ -109,6 +99,19 @@ export default function CollectionPage() {
                 </>
               )}
             </div>
+            <button
+              onClick={() => setShowNightPicker(true)}
+              className="flex items-center justify-center w-9 h-9 rounded-full glass-pill text-text-secondary hover:text-primary transition-colors"
+              title="Game Night"
+            >
+              <Dices size={18} />
+            </button>
+            <button
+              onClick={() => navigate('/game/new')}
+              className="flex items-center justify-center w-9 h-9 rounded-full glass-pill text-text-secondary hover:text-primary transition-colors"
+            >
+              <Plus size={20} />
+            </button>
           </div>
         </div>
       </div>
@@ -135,16 +138,6 @@ export default function CollectionPage() {
           </div>
         )}
       </div>
-
-      {/* FAB — hidden when search is open */}
-      {!isSearchOpen && (
-        <button
-          onClick={() => navigate('/game/new')}
-          className="fixed bottom-24 right-4 w-11 h-11 rounded-full bg-primary/90 text-white flex items-center justify-center depth-2 active:scale-90 transition-all z-10"
-        >
-          <Plus size={20} strokeWidth={2.5} />
-        </button>
-      )}
 
       <GameNightPicker open={showNightPicker} onClose={() => setShowNightPicker(false)} />
     </div>
