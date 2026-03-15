@@ -12,6 +12,7 @@ interface GameState {
   updateGame: (id: string, updates: Partial<BoardGame>) => void;
   deleteGame: (id: string) => void;
   removeTagFromAllGames: (tagId: string) => void;
+  setGames: (games: BoardGame[]) => void;
 }
 
 export const useGameStore = create<GameState>()(
@@ -53,6 +54,7 @@ export const useGameStore = create<GameState>()(
           ),
         }));
       },
+      setGames: (games) => set({ games }),
     }),
     {
       name: 'bg-shelf-games',

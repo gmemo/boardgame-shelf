@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg'],
       manifest: {
-        name: 'Boardgame Shelf',
-        short_name: 'BG Shelf',
-        description: 'Track your board game collection, plays, and stats — 100% offline',
+        name: 'Meeply',
+        short_name: 'Meeply',
+        description: 'Your board game companion — track collection, plays, and stats offline',
         theme_color: '#09090B',
         background_color: '#09090B',
         display: 'standalone',
