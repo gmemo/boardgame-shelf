@@ -86,7 +86,7 @@ export default function CollectionPage() {
               {showSort && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setShowSort(false)} />
-                  <div className="absolute right-0 top-full mt-2 z-20 glass rounded-xl depth-float py-1 min-w-[140px]">
+                  <div className="absolute right-0 top-full mt-2 z-20 glass-strong rounded-xl depth-float py-1 min-w-[140px]">
                     {SORT_OPTIONS.map((opt) => (
                       <button
                         key={opt.value}
