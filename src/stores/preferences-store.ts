@@ -12,6 +12,7 @@ const defaultPreferences: UserPreferences = {
   theme: 'dark',
   accentColor: 'indigo',
   hasSeenWelcome: false,
+  notPlayedRecentlyDays: 90,
 };
 
 export const usePreferencesStore = create<PreferencesState>()(

@@ -1,11 +1,12 @@
 import { useNavigate } from 'react-router-dom';
-import { Plus, Library, ArrowUpDown } from 'lucide-react';
+import { Plus, Library, ArrowUpDown, Dices } from 'lucide-react';
 import { useCollectionFilter, type SortField } from '../../lib/use-collection-filter';
 import GameCard from '../../components/game-card';
 import SearchBar from '../../components/search-bar';
 import TagFilterBar from '../../components/tag-filter-bar';
 import Button from '../../components/ui/button';
 import EmptyState from '../../components/ui/empty-state';
+import GameNightPicker from '../../components/game-night-picker';
 import { useGameStore } from '../../stores';
 import { useState } from 'react';
 
@@ -31,6 +32,7 @@ export default function CollectionPage() {
     filteredGames,
   } = useCollectionFilter();
   const [showSort, setShowSort] = useState(false);
+  const [showNightPicker, setShowNightPicker] = useState(false);
 
   const handleSortToggle = (field: SortField) => {
     if (filters.sortBy === field) {
@@ -68,6 +70,13 @@ export default function CollectionPage() {
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Collection</h1>
           <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowNightPicker(true)}
+              className="flex items-center gap-1 text-primary hover:text-primary-dark transition-colors"
+              title="Game Night"
+            >
+              <Dices size={18} />
+            </button>
             <span className="text-xs text-text-secondary">{filteredGames.length} games</span>
             <div className="relative">
               <button
@@ -140,6 +149,8 @@ export default function CollectionPage() {
       >
         <Plus size={24} />
       </button>
+
+      <GameNightPicker open={showNightPicker} onClose={() => setShowNightPicker(false)} />
     </div>
   );
 }

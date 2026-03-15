@@ -1,5 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useGameStore } from '../stores';
+import { filterGames } from './filter-games';
 
 export type SortField = 'name' | 'rating' | 'complexity' | 'recentlyAdded' | 'playTime';
 export type SortDirection = 'asc' | 'desc';
@@ -65,38 +66,12 @@ export function useCollectionFilter() {
     filters.maxPlayTime !== null;
 
   const filteredGames = useMemo(() => {
-    let result = [...games];
-    const query = filters.search.toLowerCase().trim();
-
-    // Search
-    if (query) {
-      result = result.filter(
-        (g) =>
-          g.name.toLowerCase().includes(query) ||
-          g.description.toLowerCase().includes(query),
-      );
-    }
-
-    // Tag filter (AND logic)
-    if (filters.tagIds.length > 0) {
-      result = result.filter((g) =>
-        filters.tagIds.every((tagId) => g.tagIds.includes(tagId)),
-      );
-    }
-
-    // Player count
-    if (filters.playerCount !== null) {
-      result = result.filter(
-        (g) =>
-          g.minPlayers <= filters.playerCount! &&
-          g.maxPlayers >= filters.playerCount!,
-      );
-    }
-
-    // Play time
-    if (filters.maxPlayTime !== null) {
-      result = result.filter((g) => g.playTimeMinutes <= filters.maxPlayTime!);
-    }
+    const result = filterGames([...games], {
+      search: filters.search,
+      tagIds: filters.tagIds,
+      playerCount: filters.playerCount,
+      maxPlayTime: filters.maxPlayTime,
+    });
 
     // Sort
     const dir = filters.sortDirection === 'asc' ? 1 : -1;

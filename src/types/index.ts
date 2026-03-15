@@ -47,8 +47,20 @@ export interface PlaySession {
   createdAt: string;
 }
 
+export interface PlayLog {
+  id: string;
+  gameId: string;
+  date: string; // YYYY-MM-DD
+  playerNames: string[];
+  winnerName: string | null;
+  duration: number | null; // minutes
+  notes: string;
+  createdAt: string;
+}
+
 export interface UserPreferences {
   theme: 'dark' | 'light';
   accentColor: string;
   hasSeenWelcome: boolean;
+  notPlayedRecentlyDays: number;
 }
