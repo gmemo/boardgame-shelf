@@ -115,7 +115,7 @@ export default function BottomNav() {
                     setActiveTab(path);
                     navigate(path);
                   }}
-                  className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 transition-colors whitespace-nowrap z-[1] ${
+                  className={`relative flex flex-col items-center gap-0.5 flex-1 py-1.5 transition-colors whitespace-nowrap z-[1] ${
                     active ? 'text-primary' : 'text-text-secondary'
                   }`}
                 >
@@ -190,7 +190,7 @@ export default function BottomNav() {
               value={localSearch}
               onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search games..."
-              className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none min-w-0"
+              className="flex-1 bg-transparent text-base text-text-primary placeholder:text-text-secondary/50 focus:outline-none min-w-0"
             />
             {localSearch && (
               <button

@@ -17,7 +17,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         <textarea
           ref={ref}
           id={textareaId}
-          className={`w-full rounded-xl glass-input px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none transition-colors resize-none ${className}`}
+          className={`w-full rounded-xl glass-input px-4 py-3 text-base text-text-primary placeholder:text-text-secondary/50 focus:outline-none transition-colors resize-none ${className}`}
           rows={3}
           {...props}
         />
