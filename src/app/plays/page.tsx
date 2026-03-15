@@ -27,7 +27,7 @@ export default function PlaysPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 glass-strong px-4 pt-4 pb-3">
+      <div className="sticky top-0 z-10 glass-strong px-4 pt-4 pb-3 header-fade">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Plays</h1>
           <span className="text-xs text-text-secondary">
@@ -65,7 +65,7 @@ export default function PlaysPage() {
       {/* FAB */}
       <button
         onClick={() => navigate('/plays/log')}
-        className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center depth-float active:scale-90 transition-all z-10"
+        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center fab-halo active:scale-90 transition-all z-10"
       >
         <Plus size={24} />
       </button>

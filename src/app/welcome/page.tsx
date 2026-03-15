@@ -12,7 +12,8 @@ export default function WelcomePage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-6">
+    <div className="flex flex-col items-center justify-center h-full p-8 text-center gap-6 relative">
+      <div className="ambient-glow" />
       <div className="w-20 h-20 rounded-2xl bg-primary/20 flex items-center justify-center">
         <Dices size={40} className="text-primary" />
       </div>

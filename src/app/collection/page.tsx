@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { Plus, Library, ArrowUpDown, Dices } from 'lucide-react';
 import { useCollectionFilter, type SortField } from '../../lib/use-collection-filter';
+import { useCollectionFilterStore } from '../../stores';
 import GameCard from '../../components/game-card';
-import SearchBar from '../../components/search-bar';
-import TagFilterBar from '../../components/tag-filter-bar';
 import Button from '../../components/ui/button';
 import EmptyState from '../../components/ui/empty-state';
 import GameNightPicker from '../../components/game-night-picker';
@@ -23,14 +22,13 @@ export default function CollectionPage() {
   const { games } = useGameStore();
   const {
     filters,
-    setSearch,
-    toggleTagFilter,
     setSortBy,
     setSortDirection,
     resetFilters,
     hasActiveFilters,
     filteredGames,
   } = useCollectionFilter();
+  const { isSearchOpen } = useCollectionFilterStore();
   const [showSort, setShowSort] = useState(false);
   const [showNightPicker, setShowNightPicker] = useState(false);
 
@@ -44,7 +42,6 @@ export default function CollectionPage() {
     setShowSort(false);
   };
 
-  // No games at all
   if (games.length === 0) {
     return (
       <div className="h-full flex items-center justify-center p-4">
@@ -65,8 +62,8 @@ export default function CollectionPage() {
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="sticky top-0 z-10 glass-strong px-4 pt-4 pb-3 flex flex-col gap-3">
+      {/* Header — title + count + sort only */}
+      <div className="sticky top-0 z-10 glass-strong px-4 pt-4 pb-3 header-fade">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Collection</h1>
           <div className="flex items-center gap-2">
@@ -114,9 +111,6 @@ export default function CollectionPage() {
             </div>
           </div>
         </div>
-
-        <SearchBar value={filters.search} onChange={setSearch} />
-        <TagFilterBar selectedIds={filters.tagIds} onToggle={toggleTagFilter} />
       </div>
 
       {/* Grid */}
@@ -142,13 +136,15 @@ export default function CollectionPage() {
         )}
       </div>
 
-      {/* FAB */}
-      <button
-        onClick={() => navigate('/game/new')}
-        className="fixed bottom-20 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center depth-float active:scale-90 transition-all z-10"
-      >
-        <Plus size={24} />
-      </button>
+      {/* FAB — hidden when search is open */}
+      {!isSearchOpen && (
+        <button
+          onClick={() => navigate('/game/new')}
+          className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center fab-halo active:scale-90 transition-all z-10"
+        >
+          <Plus size={24} />
+        </button>
+      )}
 
       <GameNightPicker open={showNightPicker} onClose={() => setShowNightPicker(false)} />
     </div>

@@ -23,7 +23,7 @@ export default function TagFilterBar({ selectedIds, onToggle }: TagFilterBarProp
             onClick={() => onToggle(tag.id)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-all active:scale-95 ${
               active
-                ? 'bg-primary text-white'
+                ? 'bg-primary text-white tag-glow'
                 : 'glass-pill text-text-secondary'
             }`}
           >

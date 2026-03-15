@@ -135,7 +135,7 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
                       onClick={() => setMaxPlayTime(preset.value)}
                       className={`rounded-full px-3 py-1.5 text-xs font-medium transition-all flex-1 ${
                         maxPlayTime === preset.value
-                          ? 'bg-primary text-white'
+                          ? 'bg-primary text-white tag-glow'
                           : 'glass-pill text-text-secondary'
                       }`}
                     >
@@ -158,7 +158,7 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
                         onClick={() => toggleTag(tag.id)}
                         className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
                           selectedTagIds.includes(tag.id)
-                            ? 'bg-primary text-white'
+                            ? 'bg-primary text-white tag-glow'
                             : 'glass-pill text-text-secondary'
                         }`}
                       >

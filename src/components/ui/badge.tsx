@@ -12,7 +12,7 @@ export default function Badge({ label, variant = 'default', onRemove, onClick, c
   const variantClasses = {
     default: 'glass-pill text-text-secondary',
     primary: 'bg-primary/20 text-primary border border-primary/30',
-    active: 'bg-primary text-white',
+    active: 'bg-primary text-white tag-glow',
   };
 
   const Component = onClick ? 'button' : 'span';
