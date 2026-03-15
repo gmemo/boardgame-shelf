@@ -63,9 +63,14 @@ export default function WelcomePage() {
 
     const onScroll = () => {
       if (!hasScrolled) setHasScrolled(true);
-      const cardWidth = el.offsetWidth * 0.78 + 12; // card width + gap
-      const index = Math.round(el.scrollLeft / cardWidth);
-      setActiveCard(Math.min(index, FEATURES.length - 1));
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (el.scrollLeft >= maxScroll - 10) {
+        setActiveCard(FEATURES.length - 1);
+      } else {
+        const cardWidth = el.offsetWidth * 0.78 + 12; // card width + gap
+        const index = Math.round(el.scrollLeft / cardWidth);
+        setActiveCard(Math.min(index, FEATURES.length - 1));
+      }
     };
 
     el.addEventListener('scroll', onScroll, { passive: true });

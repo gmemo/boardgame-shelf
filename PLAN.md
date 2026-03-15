@@ -158,15 +158,15 @@ Share game info with friends so they can browse before game night.
 
 > **Status legend:** `[ ]` not started · `[~]` in progress · `[?]` in review · `[x]` done
 
-### Phase 1 — Foundation `[?]`
+### Phase 1 — Foundation `[x]` ✅ Deployed
 - [x] Game Card: add, edit, delete, detail view
 - [x] Tag system: system tags + default tags + custom tags + filtering
 - [x] Collection list with search and tag filters
 
-### Phase 2 — Game Night Experience `[ ]`
-- [ ] Game Night Picker (filter overlay + random pick)
-- [ ] Play Log (quick log entries per game)
-- [ ] System tag automation (`new`, `not played recently`)
+### Phase 2 — Game Night Experience `[x]` ✅ Deployed
+- [x] Game Night Picker (filter overlay + random pick)
+- [x] Play Log (quick log entries per game)
+- [x] System tag automation (`new`, `not played recently`)
 
 ### Phase 3 — Session Tracking `[ ]`
 - [ ] Sessions: create, edit, delete, status management

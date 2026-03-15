@@ -63,7 +63,7 @@ export default function CollectionPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header — title + count + sort only */}
-      <div className="sticky top-0 z-10 px-4 pt-4 pb-5 bg-gradient-to-b from-background from-60% to-transparent">
+      <div className="sticky top-0 z-10 px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-5 bg-gradient-to-b from-background from-60% to-transparent">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Collection</h1>
           <div className="flex items-center gap-2">
@@ -140,9 +140,9 @@ export default function CollectionPage() {
       {!isSearchOpen && (
         <button
           onClick={() => navigate('/game/new')}
-          className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center fab-halo active:scale-90 transition-all z-10"
+          className="fixed bottom-24 right-4 w-11 h-11 rounded-full bg-primary/90 text-white flex items-center justify-center depth-2 active:scale-90 transition-all z-10"
         >
-          <Plus size={24} />
+          <Plus size={20} strokeWidth={2.5} />
         </button>
       )}
 
