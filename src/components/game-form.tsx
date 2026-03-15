@@ -107,7 +107,7 @@ export default function GameForm({ game }: GameFormProps) {
     <div className="flex flex-col h-full bg-background">
       <div className="ambient-glow" />
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 glass-strong sticky top-0 z-10">
+      <div className="flex items-center gap-2 px-4 py-3 bg-background sticky top-0 z-10">
         <IconButton onClick={() => navigate(-1)}>
           <ChevronLeft size={24} />
         </IconButton>

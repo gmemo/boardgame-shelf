@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, CalendarPlus } from 'lucide-react';
+import { motion } from 'framer-motion';
 import type { BoardGame } from '../types';
 import { useGameStore, useTagStore, usePlayLogStore, SYSTEM_TAG_IDS } from '../stores';
 import IconButton from './ui/icon-button';
@@ -42,55 +43,49 @@ export default function GameDetail({ game }: GameDetailProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.96 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+      className="flex flex-col h-full bg-background"
+    >
       <div className="ambient-glow" />
-      {/* Hero / Header */}
-      <div className="relative">
-        {game.imageUrl ? (
-          <div className="relative">
-            <img
-              src={game.imageUrl}
-              alt={game.name}
-              className="w-full aspect-[4/3] object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
-          </div>
-        ) : (
-          <div className="w-full aspect-[3/2] bg-surface flex items-center justify-center">
-            <span className="text-6xl font-bold text-text-secondary/20">
-              {game.name.charAt(0).toUpperCase()}
-            </span>
-          </div>
-        )}
 
-        {/* Floating header */}
-        <div className="absolute top-0 left-0 right-0 flex items-center justify-between p-2">
-          <IconButton
-            onClick={() => navigate(-1)}
-            className="bg-black/40 text-white hover:bg-black/60"
-          >
-            <ChevronLeft size={24} />
+      {/* Top action bar */}
+      <div className="flex items-center justify-between p-3 relative z-10">
+        <IconButton onClick={() => navigate(-1)}>
+          <ChevronLeft size={24} />
+        </IconButton>
+        <div className="flex gap-1">
+          <IconButton onClick={() => navigate(`/game/${game.id}/edit`)}>
+            <Pencil size={18} />
           </IconButton>
-          <div className="flex gap-1">
-            <IconButton
-              onClick={() => navigate(`/game/${game.id}/edit`)}
-              className="bg-black/40 text-white hover:bg-black/60"
-            >
-              <Pencil size={18} />
-            </IconButton>
-            <IconButton
-              onClick={() => setShowDelete(true)}
-              className="bg-black/40 text-white hover:bg-black/60"
-            >
-              <Trash2 size={18} />
-            </IconButton>
-          </div>
+          <IconButton onClick={() => setShowDelete(true)}>
+            <Trash2 size={18} />
+          </IconButton>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto -mt-8 relative z-[1]">
-        <div className="flex flex-col gap-5 p-4 pb-24">
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto relative z-[1]">
+        <div className="flex flex-col gap-5 px-4 pb-24">
+          {/* Hero image — rounded card */}
+          {game.imageUrl ? (
+            <div className="rounded-2xl overflow-hidden aspect-[16/9] depth-2">
+              <img
+                src={game.imageUrl}
+                alt={game.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="rounded-2xl overflow-hidden aspect-[16/9] bg-surface flex items-center justify-center depth-2">
+              <span className="text-6xl font-bold text-text-secondary/20">
+                {game.name.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
+
           {/* Title + Rating */}
           <div>
             <div className="flex items-start gap-2">
@@ -229,6 +224,6 @@ export default function GameDetail({ game }: GameDetailProps) {
         description="This will permanently remove this game and all its data. This cannot be undone."
         onConfirm={handleDelete}
       />
-    </div>
+    </motion.div>
   );
 }
