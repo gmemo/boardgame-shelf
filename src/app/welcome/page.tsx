@@ -92,13 +92,14 @@ export default function WelcomePage() {
           <div className="w-28 h-28 rounded-full glass depth-3 flex items-center justify-center relative">
             <div className="absolute inset-2 rounded-full bg-primary/10 animate-pulse" />
             <svg
-              viewBox="0 0 64 64"
+              viewBox="0 0 512 512"
               fill="none"
               className="w-14 h-14 relative z-[1]"
             >
               {/* Meeple shape */}
+              <circle cx="256" cy="96" r="64" fill="currentColor" className="text-primary" />
               <path
-                d="M32 8C29 8 27 10 27 13C27 15.5 28.5 17.5 30.5 18.3L26 24L18 22C16.5 21.7 15 22.5 14.5 24L12 32C11.5 33.5 12.5 35 14 35.3L20 36.5L18 52C17.5 54 19 56 21 56H43C45 56 46.5 54 46 52L44 36.5L50 35.3C51.5 35 52.5 33.5 52 32L49.5 24C49 22.5 47.5 21.7 46 22L38 24L33.5 18.3C35.5 17.5 37 15.5 37 13C37 10 35 8 32 8Z"
+                d="M200 152C168 164 40 212 28 252C16 292 68 316 120 282C142 268 156 258 164 252L172 282C168 296 166 310 166 310L132 432C128 460 164 468 172 444L232 366C242 354 252 350 256 350C260 350 270 354 280 366L340 444C348 468 384 460 380 432L346 310C346 310 344 296 340 282L348 252C356 258 370 268 392 282C444 316 496 292 484 252C472 212 344 164 312 152Z"
                 fill="currentColor"
                 className="text-primary"
               />
