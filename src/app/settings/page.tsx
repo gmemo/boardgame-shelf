@@ -56,7 +56,7 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-4 pt-4 pb-3">
+      <div className="sticky top-0 z-10 px-4 pt-4 pb-3 bg-transparent">
         <h1 className="text-xl font-bold text-text-primary">Settings</h1>
       </div>
 
