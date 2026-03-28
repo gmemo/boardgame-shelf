@@ -125,7 +125,15 @@ html, body, #root {
 html {
   height: 100vh;
   height: 100dvh;
-  background-color: #4f46e5;
+  background:
+    radial-gradient(ellipse 150% 80% at 50% 0%, rgba(var(--primary-rgb), 0.45) 0%, rgba(var(--primary-rgb), 0.05) 100%),
+    var(--background);
+}
+
+[data-theme="light"] html {
+  background:
+    radial-gradient(ellipse 150% 80% at 50% 0%, rgba(var(--primary-rgb), 0.12) 0%, rgba(var(--primary-rgb), 0.02) 100%),
+    var(--background);
 }
 
 body {
@@ -133,7 +141,6 @@ body {
   min-height: 100dvh;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
     system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  background-color: var(--background);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -186,14 +193,9 @@ input, textarea {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background: transparent;
-}
-
-[data-theme="light"] .ambient-glow {
   background:
-    radial-gradient(ellipse 150% 90% at 50% 0%, rgba(var(--primary-rgb), 0.12) 0%, transparent 70%),
-    radial-gradient(ellipse 90% 70% at 90% 35%, rgba(var(--glow-secondary-rgb), 0.08) 0%, transparent 65%),
-    radial-gradient(ellipse 90% 60% at 10% 85%, rgba(var(--glow-tertiary-rgb), 0.06) 0%, transparent 65%);
+    radial-gradient(ellipse 90% 70% at 90% 35%, rgba(var(--glow-secondary-rgb), 0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 90% 60% at 10% 85%, rgba(var(--glow-tertiary-rgb), 0.14) 0%, transparent 65%);
 }
 
 /* ===== Glass Utility Classes ===== */
