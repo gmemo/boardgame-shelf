@@ -121,9 +121,10 @@ Each accent (indigo, emerald, red, blue, amber, purple) defines `--primary-rgb`,
 - **PO**: UX flows, feature behavior, and any user-facing change that alters how the product works requires user sign-off.
 - **Process**: The user defines the task or goal. Claude designs the approach (checking in on major decisions) and creates a PR targeting `main`. Everything is behind a PR so we can roll back if needed.
 - **Review**: The user reviews and approves the PR. Claude does NOT merge — only the user merges.
-- **Branching**: Create a feature branch per task (`feat/<short-name>`), commit all work there, push, and open a PR with `gh pr create`.
-- **Build check**: Always run `npm run build` before pushing to ensure no type errors or build failures.
+- **Branching**: Always use a **git worktree** for each task to avoid branch conflicts in the main working directory. Use `isolation: "worktree"` when spawning agents, or manually create worktrees with `git worktree add`. Branch naming: `feat/<short-name>`, `fix/<short-name>`, etc. Commit all work in the worktree, push, and open a PR with `gh pr create`.
+- **Build check**: Always run `npm run build` inside the worktree before pushing to ensure no type errors or build failures.
 - **Autonomy**: Claude should work autonomously in the background and notify the user when the PR is ready for review.
+- **Cleanup**: After a PR is merged, remove the worktree with `git worktree remove <path>`.
 
 ## Deployment
 
