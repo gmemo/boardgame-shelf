@@ -125,6 +125,7 @@ html, body, #root {
 html {
   height: 100vh;
   height: 100dvh;
+  background-color: var(--background);
 }
 
 body {
@@ -321,4 +322,18 @@ input, textarea {
   box-shadow:
     0 12px 40px var(--glass-shadow-1),
     0 4px 12px var(--glass-shadow-2);
+}
+
+/* ===== iOS PWA Safe Area Utilities ===== */
+
+.safe-bottom-nav {
+  bottom: max(0.25rem, env(safe-area-inset-bottom));
+}
+
+.safe-bottom-filter {
+  bottom: calc(4.5rem + max(0.75rem, env(safe-area-inset-bottom)));
+}
+
+.safe-bottom-fill {
+  height: env(safe-area-inset-bottom);
 }
