@@ -192,10 +192,6 @@ input, textarea {
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse 90% 70% at 90% 35%, rgba(var(--glow-secondary-rgb), 0.18) 0%, transparent 65%),
-    radial-gradient(ellipse 90% 60% at 10% 85%, rgba(var(--glow-tertiary-rgb), 0.14) 0%, transparent 65%);
 }
 
 /* ===== Glass Utility Classes ===== */

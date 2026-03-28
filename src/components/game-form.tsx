@@ -106,7 +106,7 @@ export default function GameForm({ game }: GameFormProps) {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 pt-4 pb-3 sticky top-0 z-10 bg-transparent">
+      <div className="flex items-center gap-2 px-4 pt-4 pb-3">
         <IconButton onClick={() => navigate(-1)}>
           <ChevronLeft size={24} />
         </IconButton>
@@ -116,7 +116,7 @@ export default function GameForm({ game }: GameFormProps) {
       </div>
 
       {/* Form */}
-      <div className="flex-1 overflow-y-auto bg-transparent">
+      <div className="flex-1 overflow-y-auto">
         <div className="flex flex-col gap-5 p-4 pb-28">
           <ImagePicker
             value={form.imageUrl}

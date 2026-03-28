@@ -27,7 +27,7 @@ export default function PlaysPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-4 pt-4 pb-3 bg-transparent">
+      <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Plays</h1>
           <div className="flex items-center gap-3">
@@ -45,7 +45,7 @@ export default function PlaysPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 pb-24 bg-transparent">
+      <div className="flex-1 overflow-y-auto p-4 pb-24">
         {playLogs.length === 0 ? (
           <EmptyState
             icon={<CalendarDays size={48} strokeWidth={1.5} />}
