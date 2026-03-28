@@ -72,7 +72,6 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="ambient-glow" />
       {/* Header */}
       <div className="glass-strong px-4 py-3 flex items-center gap-3">
         <button onClick={handleBack} className="text-text-secondary">
@@ -140,7 +139,7 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
                     placeholder={`Player ${i + 1}`}
                     value={name}
                     onChange={(e) => updatePlayer(i, e.target.value)}
-                    className="flex-1 rounded-xl glass-input px-4 py-3 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none transition-colors"
+                    className="flex-1 rounded-xl glass-input px-4 py-3 text-base text-text-primary placeholder:text-text-secondary/50 focus:outline-none transition-colors"
                   />
                   {playerNames.length > 1 && (
                     <button

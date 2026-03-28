@@ -62,7 +62,7 @@ export default function GamePicker({ open, onClose, onSelect }: GamePickerProps)
                   placeholder="Search games..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="flex-1 bg-transparent text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
+                  className="flex-1 bg-transparent text-base text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
                 />
               </div>
             </div>
