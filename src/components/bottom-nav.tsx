@@ -39,10 +39,9 @@ export default function BottomNav() {
 
   // Fix iOS PWA: env(safe-area-inset-bottom) not computed for fixed elements until scroll fires
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      window.dispatchEvent(new Event('scroll'));
+    [50, 150, 400].forEach(delay => {
+      setTimeout(() => window.dispatchEvent(new Event('scroll')), delay);
     });
-    return () => cancelAnimationFrame(frame);
   }, []);
 
   // Auto-close search when navigating away from collection
@@ -84,7 +83,7 @@ export default function BottomNav() {
   return (
     <>
       {/* Safe area background fill below nav pill */}
-      <div className="fixed bottom-0 inset-x-0 bg-background z-[49] safe-bottom-fill" />
+      <div className="fixed bottom-0 inset-x-0 z-[49] safe-bottom-fill" />
 
       {/* Tag filter panel — slides up above nav when search is open */}
       <AnimatePresence>

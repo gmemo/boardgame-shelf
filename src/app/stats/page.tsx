@@ -1,7 +1,7 @@
 export default function StatsPage() {
   return (
     <div className="flex flex-col h-full">
-      <div className="sticky top-0 z-10 px-4 pt-4 pb-3 bg-gradient-to-b from-background from-60% to-transparent">
+      <div className="px-4 pt-4 pb-3">
         <h1 className="text-xl font-bold text-text-primary">Stats</h1>
       </div>
       <div className="flex-1 p-4">

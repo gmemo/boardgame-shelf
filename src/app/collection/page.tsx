@@ -61,7 +61,7 @@ export default function CollectionPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header — title + actions */}
-      <div className="sticky top-0 z-10 px-4 pt-4 pb-3 bg-gradient-to-b from-background from-60% to-transparent">
+      <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Collection</h1>
           <div className="flex items-center gap-3">
