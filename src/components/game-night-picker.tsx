@@ -100,7 +100,7 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-8">
+            <div className="flex-1 overflow-y-auto px-4 pb-8 bg-transparent">
               {/* Player Count Stepper */}
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm font-medium text-text-secondary">Players</span>

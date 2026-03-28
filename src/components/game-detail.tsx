@@ -65,7 +65,7 @@ export default function GameDetail({ game }: GameDetailProps) {
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto relative z-[1]">
+      <div className="flex-1 overflow-y-auto relative z-[1] bg-transparent">
         <div className="flex flex-col gap-5 px-4 pb-24">
           {/* Hero image — rounded card */}
           {game.imageUrl ? (

@@ -45,7 +45,7 @@ export default function PlaysPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 pb-24">
+      <div className="flex-1 overflow-y-auto p-4 pb-24 bg-transparent">
         {playLogs.length === 0 ? (
           <EmptyState
             icon={<CalendarDays size={48} strokeWidth={1.5} />}

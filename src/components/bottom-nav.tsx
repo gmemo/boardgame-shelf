@@ -39,10 +39,10 @@ export default function BottomNav() {
 
   // Fix iOS PWA: env(safe-area-inset-bottom) not computed for fixed elements until scroll fires
   useEffect(() => {
-    const frame = requestAnimationFrame(() => {
+    const timer = setTimeout(() => {
       window.dispatchEvent(new Event('scroll'));
-    });
-    return () => cancelAnimationFrame(frame);
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   // Auto-close search when navigating away from collection

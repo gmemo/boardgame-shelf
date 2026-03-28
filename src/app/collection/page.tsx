@@ -117,7 +117,7 @@ export default function CollectionPage() {
       </div>
 
       {/* Grid */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-4 bg-transparent">
         {filteredGames.length === 0 ? (
           <EmptyState
             title="No matches"

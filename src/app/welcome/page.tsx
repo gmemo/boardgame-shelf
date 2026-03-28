@@ -78,7 +78,7 @@ export default function WelcomePage() {
   }, [hasScrolled]);
 
   return (
-    <div className="flex flex-col h-full relative overflow-y-auto">
+    <div className="flex flex-col h-full relative overflow-y-auto bg-transparent">
       <motion.div
         className="flex flex-col items-center flex-1 relative z-[1] pt-16 pb-28"
         variants={stagger}

@@ -116,7 +116,7 @@ export default function GameForm({ game }: GameFormProps) {
       </div>
 
       {/* Form */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto bg-transparent">
         <div className="flex flex-col gap-5 p-4 pb-28">
           <ImagePicker
             value={form.imageUrl}
