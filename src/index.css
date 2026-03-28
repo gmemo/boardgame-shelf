@@ -116,27 +116,21 @@ html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
+  background-color: transparent;
+}
+
+html {
+  height: 100vh;
+  height: 100dvh;
+  background-color: var(--background);
 }
 
 #root {
   padding-top: env(safe-area-inset-top);
 }
 
-html {
-  height: 100vh;
-  height: 100dvh;
-  background:
-    radial-gradient(ellipse 150% 80% at 50% 0%, rgba(var(--primary-rgb), 0.45) 0%, rgba(var(--primary-rgb), 0.05) 100%),
-    var(--background);
-}
-
-[data-theme="light"] html {
-  background:
-    radial-gradient(ellipse 150% 80% at 50% 0%, rgba(var(--primary-rgb), 0.12) 0%, rgba(var(--primary-rgb), 0.02) 100%),
-    var(--background);
-}
-
 body {
+  background-color: transparent;
   min-height: 100vh;
   min-height: 100dvh;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
@@ -147,7 +141,7 @@ body {
   overscroll-behavior: none;
   user-select: none;
   -webkit-user-select: none;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .glass, .glass-light, .glass-strong, .glass-pill {
@@ -187,11 +181,24 @@ input, textarea {
 
 /* ===== Ambient Background Glow ===== */
 
+/* Fixed GPU layer at z-index:-1 (behind all normal flow content).
+   The gradient lives here so that transparent overflow-y:auto containers
+   correctly composite over a GPU layer (rather than over the html canvas,
+   which iOS can render opaque on compositing layer promotion). */
 .ambient-glow {
   position: fixed;
   inset: 0;
-  z-index: 0;
+  z-index: -1;
   pointer-events: none;
+  background:
+    radial-gradient(ellipse 150% 80% at 50% 0%, rgba(var(--primary-rgb), 0.45) 0%, rgba(var(--primary-rgb), 0.05) 100%),
+    var(--background);
+}
+
+[data-theme="light"] .ambient-glow {
+  background:
+    radial-gradient(ellipse 150% 80% at 50% 0%, rgba(var(--primary-rgb), 0.12) 0%, rgba(var(--primary-rgb), 0.02) 100%),
+    var(--background);
 }
 
 /* ===== Glass Utility Classes ===== */
@@ -323,6 +330,7 @@ input, textarea {
 
 .safe-bottom-nav {
   bottom: max(0.25rem, env(safe-area-inset-bottom));
+  transition: bottom 0.15s ease;
 }
 
 .safe-bottom-filter {
