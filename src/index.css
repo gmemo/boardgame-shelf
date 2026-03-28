@@ -187,16 +187,16 @@ input, textarea {
   pointer-events: none;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 140% 80% at 50% -5%, rgba(var(--primary-rgb), 0.22) 0%, transparent 65%),
-    radial-gradient(ellipse 80% 70% at 90% 30%, rgba(var(--glow-secondary-rgb), 0.12) 0%, transparent 65%),
-    radial-gradient(ellipse 90% 60% at 10% 80%, rgba(var(--glow-tertiary-rgb), 0.10) 0%, transparent 65%);
+    radial-gradient(ellipse 150% 90% at 50% 0%, rgba(var(--primary-rgb), 0.42) 0%, transparent 70%),
+    radial-gradient(ellipse 90% 70% at 90% 35%, rgba(var(--glow-secondary-rgb), 0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 90% 60% at 10% 85%, rgba(var(--glow-tertiary-rgb), 0.14) 0%, transparent 65%);
 }
 
 [data-theme="light"] .ambient-glow {
   background:
-    radial-gradient(ellipse 140% 80% at 50% -5%, rgba(var(--primary-rgb), 0.07) 0%, transparent 65%),
-    radial-gradient(ellipse 80% 70% at 90% 30%, rgba(var(--glow-secondary-rgb), 0.05) 0%, transparent 65%),
-    radial-gradient(ellipse 90% 60% at 10% 80%, rgba(var(--glow-tertiary-rgb), 0.04) 0%, transparent 65%);
+    radial-gradient(ellipse 150% 90% at 50% 0%, rgba(var(--primary-rgb), 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 90% 70% at 90% 35%, rgba(var(--glow-secondary-rgb), 0.08) 0%, transparent 65%),
+    radial-gradient(ellipse 90% 60% at 10% 85%, rgba(var(--glow-tertiary-rgb), 0.06) 0%, transparent 65%);
 }
 
 /* ===== Glass Utility Classes ===== */
