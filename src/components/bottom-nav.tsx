@@ -84,7 +84,7 @@ export default function BottomNav() {
   return (
     <>
       {/* Safe area background fill below nav pill */}
-      <div className="fixed bottom-0 inset-x-0 bg-background z-[49] safe-bottom-fill" />
+      <div className="fixed bottom-0 inset-x-0 z-[49] safe-bottom-fill" />
 
       {/* Tag filter panel — slides up above nav when search is open */}
       <AnimatePresence>

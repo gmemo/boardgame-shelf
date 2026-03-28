@@ -27,7 +27,7 @@ export default function PlaysPage() {
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="sticky top-0 z-10 px-4 pt-4 pb-3 bg-gradient-to-b from-background from-60% to-transparent">
+      <div className="sticky top-0 z-10 px-4 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-text-primary">Plays</h1>
           <div className="flex items-center gap-3">
