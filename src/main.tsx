@@ -5,7 +5,6 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <div className="ambient-glow" />
     <App />
   </StrictMode>,
 )
