@@ -125,7 +125,7 @@ html, body, #root {
 html {
   height: 100vh;
   height: 100dvh;
-  background-color: var(--background);
+  background-color: #4f46e5;
 }
 
 body {
@@ -186,10 +186,7 @@ input, textarea {
   z-index: 0;
   pointer-events: none;
   overflow: hidden;
-  background:
-    radial-gradient(ellipse 150% 90% at 50% 0%, rgba(var(--primary-rgb), 0.42) 0%, transparent 70%),
-    radial-gradient(ellipse 90% 70% at 90% 35%, rgba(var(--glow-secondary-rgb), 0.18) 0%, transparent 65%),
-    radial-gradient(ellipse 90% 60% at 10% 85%, rgba(var(--glow-tertiary-rgb), 0.14) 0%, transparent 65%);
+  background: transparent;
 }
 
 [data-theme="light"] .ambient-glow {
