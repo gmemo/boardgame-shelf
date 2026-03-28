@@ -52,7 +52,7 @@ export default function BottomNav() {
   // Auto-focus input when search opens
   useEffect(() => {
     if (isSearchOpen) {
-      setTimeout(() => inputRef.current?.focus(), 200);
+      setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 200);
     }
   }, [isSearchOpen]);
 
@@ -75,6 +75,9 @@ export default function BottomNav() {
 
   return (
     <>
+      {/* Safe area background fill below nav pill */}
+      <div className="fixed bottom-0 inset-x-0 bg-background z-[49]" style={{ height: 'env(safe-area-inset-bottom)' }} />
+
       {/* Tag filter panel — slides up above nav when search is open */}
       <AnimatePresence>
         {searchActive && (
@@ -91,7 +94,7 @@ export default function BottomNav() {
       </AnimatePresence>
 
       {/* Bottom bar — flex container: nav pill + search area (always rendered) */}
-      <div className="fixed bottom-0 left-4 right-4 mb-[max(0.75rem,env(safe-area-inset-bottom))] z-50 flex items-center gap-2 h-14">
+      <div className="fixed bottom-0 left-4 right-4 mb-[max(0.25rem,env(safe-area-inset-bottom))] z-50 flex items-center gap-2 h-14">
 
         {/* Nav pill — shrinks to home button when search active */}
         <nav

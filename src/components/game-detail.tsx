@@ -49,8 +49,6 @@ export default function GameDetail({ game }: GameDetailProps) {
       transition={{ type: 'spring', stiffness: 260, damping: 28 }}
       className="flex flex-col h-full bg-background"
     >
-      <div className="ambient-glow" />
-
       {/* Top action bar */}
       <div className="flex items-center justify-between px-3 pt-4 pb-2 relative z-10">
         <IconButton onClick={() => navigate(-1)}>

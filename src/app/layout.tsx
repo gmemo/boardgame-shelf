@@ -7,8 +7,7 @@ export default function Layout() {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="ambient-glow" />
-      <main className="flex-1 overflow-y-auto pb-24 relative z-[1]">
+      <main className="flex-1 overflow-y-auto pb-[calc(4rem+max(0.75rem,env(safe-area-inset-bottom)))] relative z-[1]">
         <Outlet />
       </main>
       <BottomNav />
