@@ -53,6 +53,8 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
       winnerName,
       duration: duration ? parseInt(duration, 10) : null,
       notes: notes.trim(),
+      categories: [],
+      playerScores: [],
     });
 
     if (onComplete) {

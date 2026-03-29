@@ -35,16 +35,43 @@ export interface Player {
   createdAt: string;
 }
 
+export interface ScoreCategory {
+  id: string;
+  name: string;
+  increment: number;
+}
+
+export interface PlayerScore {
+  playerName: string;
+  scores: Record<string, number>; // categoryId → value
+}
+
 export interface PlaySession {
   id: string;
   gameId: string;
   date: string;
-  playerIds: string[];
-  winnerId: string | null;
-  duration: number | null;
+  playerNames: string[];
+  categories: ScoreCategory[];
+  playerScores: PlayerScore[];
+  round: number;
   notes: string;
-  scores: Record<string, number>;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface WishlistItem {
+  id: string;
+  name: string;
+  type: 'game' | 'expansion';
+  linkedGameId: string | null;
+  price: string;
+  store: string;
+  link: string;
+  notes: string;
+  tagIds: string[];
+  imageUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PlayLog {
@@ -55,7 +82,10 @@ export interface PlayLog {
   winnerName: string | null;
   duration: number | null; // minutes
   notes: string;
+  categories: ScoreCategory[];
+  playerScores: PlayerScore[];
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface UserPreferences {

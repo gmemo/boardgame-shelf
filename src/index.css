@@ -340,3 +340,9 @@ input, textarea {
 .safe-bottom-fill {
   height: env(safe-area-inset-bottom);
 }
+
+/* ===== iOS Input Zoom Prevention ===== */
+/* iOS Safari zooms on any input with font-size < 16px. Enforce a minimum. */
+input, textarea, select {
+  font-size: max(16px, 1em);
+}

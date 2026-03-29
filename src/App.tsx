@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { usePreferencesStore } from './stores';
 import Layout from './app/layout';
 import CollectionPage from './app/collection/page';
-import PlaysPage from './app/plays/page';
+import SessionsPage from './app/sessions/page';
+import WishlistPage from './app/wishlist/page';
 import StatsPage from './app/stats/page';
 import SettingsPage from './app/settings/page';
 import WelcomePage from './app/welcome/page';
@@ -12,6 +13,12 @@ import GameNewPage from './app/game/new/page';
 import GameEditPage from './app/game/edit/page';
 import LogPlayPage from './app/plays/log/page';
 import GameLogPlayPage from './app/game/log-play/page';
+import SessionNewPage from './app/session/new/page';
+import SessionDetailPage from './app/session/[id]/page';
+import SessionEditPage from './app/session/[id]/edit/page';
+import WishlistNewPage from './app/wishlist/new/page';
+import WishlistEditPage from './app/wishlist/[id]/edit/page';
+import ScorekeeperPage from './app/scorekeeper/page';
 
 function useApplyTheme() {
   const { preferences } = usePreferencesStore();
@@ -45,7 +52,8 @@ function AppRoutes() {
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<CollectionPage />} />
-        <Route path="/plays" element={<PlaysPage />} />
+        <Route path="/sessions" element={<SessionsPage />} />
+        <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/stats" element={<StatsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>
@@ -54,6 +62,13 @@ function AppRoutes() {
       <Route path="/game/:id/edit" element={<GameEditPage />} />
       <Route path="/game/:id/log-play" element={<GameLogPlayPage />} />
       <Route path="/plays/log" element={<LogPlayPage />} />
+      <Route path="/plays" element={<Navigate to="/sessions" replace />} />
+      <Route path="/session/new" element={<SessionNewPage />} />
+      <Route path="/session/:id" element={<SessionDetailPage />} />
+      <Route path="/session/:id/edit" element={<SessionEditPage />} />
+      <Route path="/wishlist/new" element={<WishlistNewPage />} />
+      <Route path="/wishlist/:id/edit" element={<WishlistEditPage />} />
+      <Route path="/scorekeeper" element={<ScorekeeperPage />} />
       <Route path="/welcome" element={<Navigate to="/" replace />} />
     </Routes>
   );

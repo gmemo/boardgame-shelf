@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { X, Minus, Plus, Dices, Shuffle } from 'lucide-react';
+import { X, Minus, Plus, Dices, Shuffle, Share2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore, useTagStore, SYSTEM_TAG_IDS } from '../stores';
@@ -19,6 +19,14 @@ const TIME_PRESETS = [
   { label: 'Any', value: null },
 ];
 
+function formatGameList(games: BoardGame[]): string {
+  const lines = games.map(
+    (g) =>
+      `• ${g.name} (${g.minPlayers === g.maxPlayers ? g.minPlayers : `${g.minPlayers}-${g.maxPlayers}`}p, ${g.playTimeMinutes}min)`
+  );
+  return `Games for tonight:\n${lines.join('\n')}`;
+}
+
 export default function GameNightPicker({ open, onClose }: GameNightPickerProps) {
   const navigate = useNavigate();
   const { games } = useGameStore();
@@ -28,6 +36,7 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
   const [maxPlayTime, setMaxPlayTime] = useState<number | null>(null);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [pickedGame, setPickedGame] = useState<BoardGame | null>(null);
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
 
   const filterableTags = useMemo(
     () =>
@@ -64,6 +73,26 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
   const handleSelectGame = (game: BoardGame) => {
     onClose();
     navigate(`/game/${game.id}`);
+  };
+
+  const handleShare = async () => {
+    if (results.length === 0) return;
+    const text = formatGameList(results);
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'Game Night', text });
+      } catch {
+        // User cancelled or not supported
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(text);
+        setShareStatus('copied');
+        setTimeout(() => setShareStatus('idle'), 2000);
+      } catch {
+        // Clipboard not available
+      }
+    }
   };
 
   return (
@@ -169,15 +198,27 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
                 </div>
               )}
 
-              {/* Pick Random Button */}
-              <button
-                onClick={pickRandom}
-                disabled={results.length === 0}
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-primary text-white py-3 font-medium mb-4 active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
-              >
-                <Shuffle size={18} />
-                Pick Random! ({results.length} game{results.length !== 1 ? 's' : ''})
-              </button>
+              {/* Actions row */}
+              <div className="flex gap-2 mb-4">
+                <button
+                  onClick={pickRandom}
+                  disabled={results.length === 0}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary text-white py-3 font-medium active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
+                >
+                  <Shuffle size={18} />
+                  Pick! ({results.length})
+                </button>
+
+                {results.length > 0 && (
+                  <button
+                    onClick={handleShare}
+                    className="flex items-center justify-center gap-2 rounded-xl glass-pill px-4 py-3 font-medium text-text-secondary active:scale-95 transition-all"
+                  >
+                    <Share2 size={18} />
+                    {shareStatus === 'copied' ? 'Copied!' : 'Share'}
+                  </button>
+                )}
+              </div>
 
               {/* Random Pick Highlight */}
               <AnimatePresence mode="wait">

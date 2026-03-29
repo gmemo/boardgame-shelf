@@ -1,9 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, CalendarPlus } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, Play, Gamepad2 } from 'lucide-react';
 import type { BoardGame } from '../types';
-import { useGameStore, useTagStore, usePlayLogStore, SYSTEM_TAG_IDS } from '../stores';
+import { useGameStore, useTagStore, usePlayLogStore, useSessionStore, SYSTEM_TAG_IDS } from '../stores';
 import IconButton from './ui/icon-button';
 import Badge from './ui/badge';
 import StarRating from './ui/star-rating';
@@ -11,6 +10,9 @@ import ComplexityDots from './ui/complexity-dots';
 import ConfirmDialog from './ui/confirm-dialog';
 import Button from './ui/button';
 import PlayLogEntry from './play-log-entry';
+import PlayLogDetail from './play-log-detail';
+import { motion } from 'framer-motion';
+import type { PlayLog } from '../types';
 
 interface GameDetailProps {
   game: BoardGame;
@@ -21,7 +23,9 @@ export default function GameDetail({ game }: GameDetailProps) {
   const { deleteGame } = useGameStore();
   const { tags } = useTagStore();
   const { playLogs } = usePlayLogStore();
+  const { sessions } = useSessionStore();
   const [showDelete, setShowDelete] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<PlayLog | null>(null);
 
   const gameTags = game.tagIds
     .filter((id) => id !== SYSTEM_TAG_IDS.NEW && id !== SYSTEM_TAG_IDS.NOT_PLAYED_RECENTLY)
@@ -36,6 +40,12 @@ export default function GameDetail({ game }: GameDetailProps) {
       .sort((a, b) => b.date.localeCompare(a.date))
       .slice(0, 5);
   }, [playLogs, game.id]);
+
+  // Check for a paused session for this game
+  const pausedSession = useMemo(
+    () => sessions.find((s) => s.gameId === game.id),
+    [sessions, game.id]
+  );
 
   const handleDelete = () => {
     deleteGame(game.id);
@@ -67,14 +77,10 @@ export default function GameDetail({ game }: GameDetailProps) {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto relative z-[1]">
         <div className="flex flex-col gap-5 px-4 pb-24">
-          {/* Hero image — rounded card */}
+          {/* Hero image */}
           {game.imageUrl ? (
             <div className="rounded-2xl overflow-hidden aspect-[16/9] depth-2">
-              <img
-                src={game.imageUrl}
-                alt={game.name}
-                className="w-full h-full object-cover"
-              />
+              <img src={game.imageUrl} alt={game.name} className="w-full h-full object-cover" />
             </div>
           ) : (
             <div className="rounded-2xl overflow-hidden aspect-[16/9] bg-surface flex items-center justify-center depth-2">
@@ -87,9 +93,7 @@ export default function GameDetail({ game }: GameDetailProps) {
           {/* Title + Rating */}
           <div>
             <div className="flex items-start gap-2">
-              <h1 className="text-2xl font-bold text-text-primary flex-1">
-                {game.name}
-              </h1>
+              <h1 className="text-2xl font-bold text-text-primary flex-1">{game.name}</h1>
               {isFavorite && <span className="text-danger text-xl mt-1">&#9829;</span>}
             </div>
             {game.rating !== null && (
@@ -106,7 +110,8 @@ export default function GameDetail({ game }: GameDetailProps) {
               <span className="text-sm">
                 {game.minPlayers === game.maxPlayers
                   ? `${game.minPlayers}`
-                  : `${game.minPlayers}–${game.maxPlayers}`} players
+                  : `${game.minPlayers}–${game.maxPlayers}`}{' '}
+                players
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-text-secondary">
@@ -118,14 +123,31 @@ export default function GameDetail({ game }: GameDetailProps) {
             </div>
           </div>
 
-          {/* Log Play Button */}
-          <Button
-            onClick={() => navigate(`/game/${game.id}/log-play`)}
-            className="w-full"
-          >
-            <CalendarPlus size={18} />
-            Log Play
-          </Button>
+          {/* Play button(s) */}
+          {pausedSession ? (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => navigate(`/scorekeeper?gameId=${game.id}`)}
+                className="flex-1"
+              >
+                <Gamepad2 size={18} /> Play
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => navigate(`/scorekeeper?gameId=${game.id}&sessionId=${pausedSession.id}`)}
+                className="flex-1"
+              >
+                <Play size={18} /> Resume
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => navigate(`/scorekeeper?gameId=${game.id}`)}
+              className="w-full"
+            >
+              <Gamepad2 size={18} /> Play
+            </Button>
+          )}
 
           {/* Tags */}
           {gameTags.length > 0 && (
@@ -142,9 +164,7 @@ export default function GameDetail({ game }: GameDetailProps) {
 
           {/* Description */}
           {game.description && (
-            <p className="text-sm text-text-secondary leading-relaxed">
-              {game.description}
-            </p>
+            <p className="text-sm text-text-secondary leading-relaxed">{game.description}</p>
           )}
 
           {/* Quick Rules Notes */}
@@ -171,14 +191,10 @@ export default function GameDetail({ game }: GameDetailProps) {
                 {game.expansions.map((exp) => (
                   <div key={exp.id} className="flex items-center gap-2">
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        exp.owned ? 'bg-primary' : 'bg-text-secondary/30'
-                      }`}
+                      className={`w-2 h-2 rounded-full ${exp.owned ? 'bg-primary' : 'bg-text-secondary/30'}`}
                     />
                     <span
-                      className={`text-sm ${
-                        exp.owned ? 'text-text-primary' : 'text-text-secondary line-through'
-                      }`}
+                      className={`text-sm ${exp.owned ? 'text-text-primary' : 'text-text-secondary line-through'}`}
                     >
                       {exp.name}
                     </span>
@@ -195,25 +211,43 @@ export default function GameDetail({ game }: GameDetailProps) {
                 <StickyNote size={16} className="text-primary" />
                 <span className="text-sm font-semibold text-text-primary">Notes</span>
               </div>
-              <p className="text-sm text-text-secondary whitespace-pre-wrap">
-                {game.notes}
-              </p>
+              <p className="text-sm text-text-secondary whitespace-pre-wrap">{game.notes}</p>
             </div>
           )}
 
-          {/* Recent Plays */}
-          {recentPlays.length > 0 && (
-            <div>
-              <h2 className="text-sm font-semibold text-text-primary mb-3">Recent Plays</h2>
+          {/* Recent Plays — always show header with log link */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-text-primary">Recent Plays</h2>
+              <button
+                onClick={() => navigate(`/game/${game.id}/log-play`)}
+                className="text-xs text-primary"
+              >
+                + Log past play
+              </button>
+            </div>
+            {recentPlays.length > 0 && (
               <div className="flex flex-col gap-2">
                 {recentPlays.map((log) => (
-                  <PlayLogEntry key={log.id} log={log} showGameName={false} />
+                  <PlayLogEntry
+                    key={log.id}
+                    log={log}
+                    showGameName={false}
+                    onClick={() => setSelectedLog(log)}
+                  />
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Play Log Detail sheet */}
+      <PlayLogDetail
+        log={selectedLog}
+        open={!!selectedLog}
+        onClose={() => setSelectedLog(null)}
+      />
 
       <ConfirmDialog
         open={showDelete}

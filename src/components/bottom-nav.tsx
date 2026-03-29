@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Library, Dices, BarChart3, Settings, Search, Home, X } from 'lucide-react';
+import { Library, Timer, Star, BarChart3, Settings, Search, Home, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavStore, useCollectionFilterStore } from '../stores';
 import TagFilterBar from './tag-filter-bar';
 
 const tabs = [
   { path: '/', label: 'Collection', icon: Library },
-  { path: '/plays', label: 'Plays', icon: Dices },
+  { path: '/sessions', label: 'Sessions', icon: Timer },
+  { path: '/wishlist', label: 'Wishlist', icon: Star },
   { path: '/stats', label: 'Stats', icon: BarChart3 },
   { path: '/settings', label: 'Settings', icon: Settings },
 ];
