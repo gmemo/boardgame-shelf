@@ -8,6 +8,8 @@ import GameNightPicker from '../../components/game-night-picker';
 import { useGameStore } from '../../stores';
 import { useState, useRef, useCallback } from 'react';
 import type { BoardGame } from '../../types';
+import ShareCard from '../../components/share-card';
+import { generateShareImage, shareImage } from '../../lib/share-image';
 
 const SORT_OPTIONS: { value: SortField; label: string }[] = [
   { value: 'recentlyAdded', label: 'Recent' },
@@ -45,6 +47,23 @@ export default function CollectionPage() {
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
 
   const longPressTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  const shareCardRef = useRef<HTMLDivElement>(null);
+  const [sharingSingle, setSharingSingle] = useState(false);
+  const firstSelectedGame = filteredGames.find((g) => selectedIds.has(g.id));
+
+  const handleShareSelectedAsImage = async () => {
+    if (!shareCardRef.current || !firstSelectedGame || sharingSingle) return;
+    setSharingSingle(true);
+    try {
+      const file = await generateShareImage(shareCardRef.current);
+      await shareImage(file);
+    } catch (e) {
+      console.error('Share failed', e);
+    } finally {
+      setSharingSingle(false);
+    }
+  };
 
   const handleSortToggle = (field: SortField) => {
     if (filters.sortBy === field) {
@@ -276,6 +295,16 @@ export default function CollectionPage() {
             <Share2 size={16} />
             {shareStatus === 'copied' ? 'Copied!' : 'Share'}
           </button>
+          {firstSelectedGame && (
+            <button
+              onClick={handleShareSelectedAsImage}
+              disabled={sharingSingle}
+              className="flex items-center gap-1.5 text-xs glass-pill px-3 py-2 rounded-full text-text-secondary disabled:opacity-50"
+            >
+              <Share2 size={14} />
+              Image
+            </button>
+          )}
           <button
             onClick={exitSelectMode}
             className="text-text-secondary"
@@ -286,6 +315,12 @@ export default function CollectionPage() {
       )}
 
       <GameNightPicker open={showNightPicker} onClose={() => setShowNightPicker(false)} />
+
+      {firstSelectedGame && (
+        <div style={{ position: 'absolute', left: -9999, top: 0, visibility: 'hidden' }} aria-hidden="true">
+          <ShareCard ref={shareCardRef} variant="game" game={firstSelectedGame} />
+        </div>
+      )}
     </div>
   );
 }
