@@ -104,7 +104,7 @@ export default function SettingsPage() {
         <h1 className="text-xl font-bold text-text-primary">Settings</h1>
       </div>
 
-      <div className="flex flex-col gap-4 px-4 pb-8">
+      <div className="flex flex-col gap-4 px-4 pb-24">
         {/* Appearance */}
         <section className="glass rounded-2xl p-4">
           <h2 className="text-sm font-semibold text-text-primary mb-4">
@@ -120,6 +120,11 @@ export default function SettingsPage() {
               onChange={(theme) => setPreferences({ theme })}
               layoutId="theme-toggle"
             />
+            {preferences.theme === 'light' && (
+              <p className="text-xs text-text-secondary/60 italic mt-1 text-center">
+                why would anyone want light? are you ok?
+              </p>
+            )}
           </div>
 
           {/* Accent color */}

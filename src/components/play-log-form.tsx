@@ -123,12 +123,14 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
           </div>
 
           {/* Date */}
-          <Input
-            label="Date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-          />
+          <div className="max-w-[180px]">
+            <Input
+              label="Date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+            />
+          </div>
 
           {/* Players */}
           <div className="flex flex-col gap-1.5">
