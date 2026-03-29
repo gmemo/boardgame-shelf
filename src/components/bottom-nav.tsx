@@ -135,7 +135,7 @@ export default function BottomNav() {
                     <motion.div
                       layoutId="active-tab-chip"
                       transition={spring}
-                      className="absolute inset-0 rounded-xl glass-pill"
+                      className="absolute inset-y-1 inset-x-0.5 rounded-xl glass-pill"
                     />
                   )}
                   <Icon size={20} strokeWidth={active ? 2.5 : 1.5} className="relative z-[1]" />
