@@ -11,6 +11,18 @@ interface WishlistState {
   setItems: (items: WishlistItem[]) => void;
 }
 
+// Idempotent: existing fields in `raw` override the defaults via spread order
+function migrateWishlistItem(raw: Record<string, unknown>): WishlistItem {
+  return {
+    minPlayers: null,
+    maxPlayers: null,
+    playTimeMinutes: null,
+    complexity: null,
+    quickRulesNotes: '',
+    ...raw,
+  } as WishlistItem;
+}
+
 export const useWishlistStore = create<WishlistState>()(
   persist(
     (set) => ({
@@ -31,6 +43,16 @@ export const useWishlistStore = create<WishlistState>()(
       deleteItem: (id) => set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
       setItems: (items) => set({ items }),
     }),
-    { name: 'bg-shelf-wishlist', storage: createIDBStorage<WishlistState>() }
+    {
+      name: 'bg-shelf-wishlist',
+      storage: createIDBStorage<WishlistState>(),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          state.items = state.items.map((item) =>
+            migrateWishlistItem(item as unknown as Record<string, unknown>)
+          );
+        }
+      },
+    }
   )
 );
