@@ -336,10 +336,10 @@ export default function ScorekeeperPage() {
         {/* Scrollable table wrapper */}
         <div className="flex-1 overflow-auto">
           <table className="min-w-max w-full border-collapse">
-            <thead className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+            <thead className="sticky top-0 z-10 bg-[var(--glass-bg)] backdrop-blur-2xl">
               <tr>
                 {/* Player column header */}
-                <th className="sticky left-0 z-20 bg-background/90 backdrop-blur-sm min-w-[120px] px-3 py-2 text-left text-xs font-semibold text-text-secondary uppercase">
+                <th className="sticky left-0 z-20 bg-[var(--glass-bg)] backdrop-blur-2xl min-w-[120px] px-3 py-2 text-left text-xs font-semibold text-text-secondary uppercase">
                   Player
                 </th>
                 {/* Category headers */}
@@ -388,7 +388,7 @@ export default function ScorekeeperPage() {
                   </th>
                 ))}
                 {/* Total column header */}
-                <th className="sticky right-0 z-20 bg-background/90 backdrop-blur-sm min-w-[60px] px-2 py-2 text-right text-xs font-semibold text-text-secondary uppercase">
+                <th className="sticky right-0 z-20 bg-[var(--glass-bg)] backdrop-blur-2xl min-w-[60px] px-2 py-2 text-right text-xs font-semibold text-text-secondary uppercase">
                   Total
                 </th>
               </tr>
@@ -397,7 +397,7 @@ export default function ScorekeeperPage() {
               {playerNames.map((playerName, idx) => (
                 <tr key={idx} className="border-t border-white/5">
                   {/* Player name cell — sticky left */}
-                  <td className="sticky left-0 z-10 bg-background/90 backdrop-blur-sm px-2 py-3">
+                  <td className="sticky left-0 z-10 bg-[var(--glass-bg)] backdrop-blur-2xl px-2 py-3">
                     <div className="flex items-center gap-1">
                       {/* Color dot */}
                       <span
@@ -410,7 +410,7 @@ export default function ScorekeeperPage() {
                         placeholder={`Player ${idx + 1}`}
                         value={playerName}
                         onChange={(e) => updatePlayerName(idx, e.target.value)}
-                        className="bg-transparent text-sm font-medium text-text-primary focus:outline-none w-[80px] placeholder:text-text-secondary/50"
+                        className="bg-transparent text-base font-medium text-text-primary focus:outline-none w-[80px] placeholder:text-text-secondary/50"
                       />
                       {/* Remove */}
                       {playerNames.length > 1 && (
@@ -443,7 +443,7 @@ export default function ScorekeeperPage() {
                           {isEditing ? (
                             <input
                               type="number"
-                              className="glass-input rounded-lg w-16 text-center text-sm font-bold text-text-primary focus:outline-none py-0.5"
+                              className="glass-input rounded-lg w-16 text-center text-base font-bold text-text-primary focus:outline-none py-0.5"
                               autoFocus
                               value={editingScoreValue}
                               onChange={(e) => setEditingScoreValue(e.target.value)}
@@ -483,7 +483,7 @@ export default function ScorekeeperPage() {
                   })}
 
                   {/* Total cell — sticky right */}
-                  <td className="sticky right-0 z-10 bg-background/90 backdrop-blur-sm px-2 py-3 text-right font-bold text-text-primary">
+                  <td className="sticky right-0 z-10 bg-[var(--glass-bg)] backdrop-blur-2xl px-2 py-3 text-right font-bold text-text-primary">
                     {getTotal(playerName)}
                   </td>
                 </tr>
