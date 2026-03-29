@@ -4,6 +4,7 @@ import { ChevronLeft, Plus, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore, usePlayLogStore, useSessionStore, usePlayerStore } from '../../stores';
 import type { ScoreCategory, PlayerScore } from '../../types';
+import { useScrollLock } from '../../lib/use-scroll-lock';
 import Button from '../../components/ui/button';
 import ConfirmDialog from '../../components/ui/confirm-dialog';
 import IconButton from '../../components/ui/icon-button';
@@ -56,6 +57,7 @@ export default function ScorekeeperPage() {
   const [addCategorySheetOpen, setAddCategorySheetOpen] = useState(false);
   const [addPlayerSheetOpen, setAddPlayerSheetOpen] = useState(false);
   const [endSheetOpen, setEndSheetOpen] = useState(false);
+  useScrollLock(addCategorySheetOpen || addPlayerSheetOpen || endSheetOpen);
 
   // End game state
   const [winnerName, setWinnerName] = useState<string | null>(null);

@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGameStore, useTagStore, SYSTEM_TAG_IDS } from '../stores';
 import { filterGames } from '../lib/filter-games';
 import type { BoardGame } from '../types';
+import { useScrollLock } from '../lib/use-scroll-lock';
 
 interface GameNightPickerProps {
   open: boolean;
@@ -37,6 +38,7 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [pickedGame, setPickedGame] = useState<BoardGame | null>(null);
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
+  useScrollLock(open);
 
   const filterableTags = useMemo(
     () =>
