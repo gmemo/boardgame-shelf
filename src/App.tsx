@@ -17,6 +17,7 @@ import SessionNewPage from './app/session/new/page';
 import SessionDetailPage from './app/session/[id]/page';
 import SessionEditPage from './app/session/[id]/edit/page';
 import WishlistNewPage from './app/wishlist/new/page';
+import WishlistDetailPage from './app/wishlist/[id]/page';
 import WishlistEditPage from './app/wishlist/[id]/edit/page';
 import ScorekeeperPage from './app/scorekeeper/page';
 
@@ -67,6 +68,7 @@ function AppRoutes() {
       <Route path="/session/:id" element={<SessionDetailPage />} />
       <Route path="/session/:id/edit" element={<SessionEditPage />} />
       <Route path="/wishlist/new" element={<WishlistNewPage />} />
+      <Route path="/wishlist/:id" element={<WishlistDetailPage />} />
       <Route path="/wishlist/:id/edit" element={<WishlistEditPage />} />
       <Route path="/scorekeeper" element={<ScorekeeperPage />} />
       <Route path="/welcome" element={<Navigate to="/" replace />} />
