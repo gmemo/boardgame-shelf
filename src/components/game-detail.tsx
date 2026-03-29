@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, Play } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, Play, Gamepad2 } from 'lucide-react';
 import type { BoardGame } from '../types';
 import { useGameStore, useTagStore, usePlayLogStore, useSessionStore, SYSTEM_TAG_IDS } from '../stores';
 import IconButton from './ui/icon-button';
@@ -12,13 +11,12 @@ import ConfirmDialog from './ui/confirm-dialog';
 import Button from './ui/button';
 import PlayLogEntry from './play-log-entry';
 import PlayLogDetail from './play-log-detail';
+import { motion } from 'framer-motion';
 import type { PlayLog } from '../types';
 
 interface GameDetailProps {
   game: BoardGame;
 }
-
-const spring = { type: 'spring' as const, damping: 30, stiffness: 300 };
 
 export default function GameDetail({ game }: GameDetailProps) {
   const navigate = useNavigate();
@@ -27,7 +25,6 @@ export default function GameDetail({ game }: GameDetailProps) {
   const { playLogs } = usePlayLogStore();
   const { sessions } = useSessionStore();
   const [showDelete, setShowDelete] = useState(false);
-  const [playSheetOpen, setPlaySheetOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState<PlayLog | null>(null);
 
   const gameTags = game.tagIds
@@ -53,22 +50,6 @@ export default function GameDetail({ game }: GameDetailProps) {
   const handleDelete = () => {
     deleteGame(game.id);
     navigate('/', { replace: true });
-  };
-
-  const handleOpenScorekeeper = () => {
-    setPlaySheetOpen(false);
-    navigate(`/scorekeeper?gameId=${game.id}`);
-  };
-
-  const handleOpenQuickLog = () => {
-    setPlaySheetOpen(false);
-    navigate(`/game/${game.id}/log-play`);
-  };
-
-  const handleResumeSession = () => {
-    if (!pausedSession) return;
-    setPlaySheetOpen(false);
-    navigate(`/scorekeeper?gameId=${game.id}&sessionId=${pausedSession.id}`);
   };
 
   return (
@@ -142,11 +123,31 @@ export default function GameDetail({ game }: GameDetailProps) {
             </div>
           </div>
 
-          {/* Play button */}
-          <Button onClick={() => setPlaySheetOpen(true)} className="w-full">
-            <Play size={18} />
-            Play
-          </Button>
+          {/* Play button(s) */}
+          {pausedSession ? (
+            <div className="flex gap-2">
+              <Button
+                onClick={() => navigate(`/scorekeeper?gameId=${game.id}`)}
+                className="flex-1"
+              >
+                <Gamepad2 size={18} /> Play
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => navigate(`/scorekeeper?gameId=${game.id}&sessionId=${pausedSession.id}`)}
+                className="flex-1"
+              >
+                <Play size={18} /> Resume
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => navigate(`/scorekeeper?gameId=${game.id}`)}
+              className="w-full"
+            >
+              <Gamepad2 size={18} /> Play
+            </Button>
+          )}
 
           {/* Tags */}
           {gameTags.length > 0 && (
@@ -214,10 +215,18 @@ export default function GameDetail({ game }: GameDetailProps) {
             </div>
           )}
 
-          {/* Recent Plays */}
-          {recentPlays.length > 0 && (
-            <div>
-              <h2 className="text-sm font-semibold text-text-primary mb-3">Recent Plays</h2>
+          {/* Recent Plays — always show header with log link */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-text-primary">Recent Plays</h2>
+              <button
+                onClick={() => navigate(`/game/${game.id}/log-play`)}
+                className="text-xs text-primary"
+              >
+                + Log past play
+              </button>
+            </div>
+            {recentPlays.length > 0 && (
               <div className="flex flex-col gap-2">
                 {recentPlays.map((log) => (
                   <PlayLogEntry
@@ -228,81 +237,10 @@ export default function GameDetail({ game }: GameDetailProps) {
                   />
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
-
-      {/* Play Sheet */}
-      <AnimatePresence>
-        {playSheetOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-              onClick={() => setPlaySheetOpen(false)}
-            />
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={spring}
-              className="fixed inset-x-0 bottom-0 z-50 glass-strong rounded-t-3xl px-4 pt-4 pb-[max(2rem,env(safe-area-inset-bottom))]"
-            >
-              <div className="flex justify-center mb-3">
-                <div className="w-10 h-1 rounded-full bg-text-secondary/30" />
-              </div>
-              <h2 className="text-lg font-bold text-text-primary mb-4">How do you want to play?</h2>
-
-              <div className="flex flex-col gap-3">
-                {/* Paused session — show prominently at top */}
-                {pausedSession && (
-                  <button
-                    onClick={handleResumeSession}
-                    className="flex items-center gap-3 rounded-2xl bg-primary/10 border border-primary/30 px-4 py-3 text-left transition-all active:scale-[0.98]"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-primary">Resume Paused Game</p>
-                      <p className="text-xs text-text-secondary mt-0.5">
-                        {pausedSession.playerNames.filter(Boolean).join(', ') || 'No players'} · Round {pausedSession.round}
-                      </p>
-                    </div>
-                  </button>
-                )}
-
-                <button
-                  onClick={handleOpenScorekeeper}
-                  className="flex items-center gap-3 rounded-2xl glass px-4 py-3 text-left transition-all active:scale-[0.98]"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
-                    <Play size={20} className="text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-text-primary">Scorekeeper</p>
-                    <p className="text-xs text-text-secondary mt-0.5">Track scores live</p>
-                  </div>
-                </button>
-
-                <button
-                  onClick={handleOpenQuickLog}
-                  className="flex items-center gap-3 rounded-2xl glass px-4 py-3 text-left transition-all active:scale-[0.98]"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center shrink-0">
-                    <Pencil size={20} className="text-text-secondary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-text-primary">Quick Log</p>
-                    <p className="text-xs text-text-secondary mt-0.5">Just record that you played</p>
-                  </div>
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* Play Log Detail sheet */}
       <PlayLogDetail

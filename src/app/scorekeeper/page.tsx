@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, Plus, X, Minus, Pencil } from 'lucide-react';
+import { ChevronLeft, Plus, X, Minus } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useGameStore, usePlayLogStore, useSessionStore } from '../../stores';
+import { useGameStore, usePlayLogStore, useSessionStore, usePlayerStore } from '../../stores';
 import type { ScoreCategory, PlayerScore } from '../../types';
 import Button from '../../components/ui/button';
 import ConfirmDialog from '../../components/ui/confirm-dialog';
@@ -12,8 +12,8 @@ const spring = { type: 'spring' as const, damping: 30, stiffness: 300 };
 
 const INCREMENT_PRESETS = [1, 5, 10, 20];
 
-function makeCategory(name: string): ScoreCategory {
-  return { id: crypto.randomUUID(), name, increment: 1 };
+function makeCategory(name: string, increment = 1): ScoreCategory {
+  return { id: crypto.randomUUID(), name, increment };
 }
 
 export default function ScorekeeperPage() {
@@ -25,6 +25,7 @@ export default function ScorekeeperPage() {
   const { games } = useGameStore();
   const { addPlayLog } = usePlayLogStore();
   const { sessions, addSession, updateSession, deleteSession } = useSessionStore();
+  const { players: registeredPlayers } = usePlayerStore();
 
   const game = gameId ? games.find((g) => g.id === gameId) : undefined;
   const existingSession = sessionId ? sessions.find((s) => s.id === sessionId) : undefined;
@@ -39,7 +40,6 @@ export default function ScorekeeperPage() {
     return [makeCategory('Score')];
   });
   const [scores, setScores] = useState<Record<string, Record<string, number>>>(() => {
-    // scores[playerName][categoryId] = value
     if (existingSession?.playerScores?.length) {
       const result: Record<string, Record<string, number>> = {};
       for (const ps of existingSession.playerScores) {
@@ -51,29 +51,40 @@ export default function ScorekeeperPage() {
   });
   const [round, setRound] = useState(() => existingSession?.round ?? 1);
 
-  // End game sheet state
+  // Player colors — track which player names came from player store
+  const [playerColors, setPlayerColors] = useState<Record<string, string>>({});
+
+  // Sheet states
+  const [addCategorySheetOpen, setAddCategorySheetOpen] = useState(false);
+  const [addPlayerSheetOpen, setAddPlayerSheetOpen] = useState(false);
   const [endSheetOpen, setEndSheetOpen] = useState(false);
+
+  // End game state
   const [winnerName, setWinnerName] = useState<string | null>(null);
   const [endDate, setEndDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [endDuration, setEndDuration] = useState('');
   const [endNotes, setEndNotes] = useState('');
 
-  // Pause confirm
+  // Confirm dialogs
   const [pauseConfirmOpen, setPauseConfirmOpen] = useState(false);
-  // Back confirm
   const [backConfirmOpen, setBackConfirmOpen] = useState(false);
 
   // Inline category name editing
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
 
-  // Custom increment input
-  const [customIncrementCategoryId, setCustomIncrementCategoryId] = useState<string | null>(null);
-  const [customIncrementValue, setCustomIncrementValue] = useState('');
-
   // Direct score edit
   const [editingScore, setEditingScore] = useState<{ playerName: string; categoryId: string } | null>(null);
   const [editingScoreValue, setEditingScoreValue] = useState('');
+
+  // Add category sheet state
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatIncrement, setNewCatIncrement] = useState<number>(1);
+  const [newCatCustomIncrement, setNewCatCustomIncrement] = useState('');
+  const [newCatUseCustom, setNewCatUseCustom] = useState(false);
+
+  // Add player sheet state
+  const [guestPlayerName, setGuestPlayerName] = useState('');
 
   const hasAnyScore = Object.values(scores).some((catScores) =>
     Object.values(catScores).some((v) => v !== 0)
@@ -106,16 +117,16 @@ export default function ScorekeeperPage() {
   };
 
   // Player management
-  const addPlayer = () => {
-    if (playerNames.length >= 8) return;
-    setPlayerNames((prev) => [...prev, '']);
-  };
-
   const removePlayer = (index: number) => {
     const removedName = playerNames[index];
     setPlayerNames((prev) => prev.filter((_, i) => i !== index));
     if (removedName.trim()) {
       setScores((prev) => {
+        const next = { ...prev };
+        delete next[removedName];
+        return next;
+      });
+      setPlayerColors((prev) => {
         const next = { ...prev };
         delete next[removedName];
         return next;
@@ -126,9 +137,16 @@ export default function ScorekeeperPage() {
   const updatePlayerName = (index: number, value: string) => {
     const old = playerNames[index];
     setPlayerNames((prev) => prev.map((n, i) => (i === index ? value : n)));
-    // Migrate scores to new name
     if (old.trim() && value !== old) {
       setScores((prev) => {
+        const next = { ...prev };
+        if (old in next) {
+          next[value] = next[old];
+          delete next[old];
+        }
+        return next;
+      });
+      setPlayerColors((prev) => {
         const next = { ...prev };
         if (old in next) {
           next[value] = next[old];
@@ -139,9 +157,33 @@ export default function ScorekeeperPage() {
     }
   };
 
+  const addRegisteredPlayer = (name: string, color: string) => {
+    if (playerNames.length >= 8) return;
+    setPlayerNames((prev) => [...prev, name]);
+    setPlayerColors((prev) => ({ ...prev, [name]: color }));
+    setAddPlayerSheetOpen(false);
+  };
+
+  const addGuestPlayer = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed || playerNames.length >= 8) return;
+    setPlayerNames((prev) => [...prev, trimmed]);
+    setAddPlayerSheetOpen(false);
+    setGuestPlayerName('');
+  };
+
   // Category management
-  const addCategory = () => {
-    setCategories((prev) => [...prev, makeCategory(`Cat ${prev.length + 1}`)]);
+  const addCategoryFromSheet = () => {
+    const name = newCatName.trim() || `Cat ${categories.length + 1}`;
+    const increment = newCatUseCustom
+      ? (parseInt(newCatCustomIncrement, 10) || 1)
+      : newCatIncrement;
+    setCategories((prev) => [...prev, makeCategory(name, increment)]);
+    setNewCatName('');
+    setNewCatIncrement(1);
+    setNewCatCustomIncrement('');
+    setNewCatUseCustom(false);
+    setAddCategorySheetOpen(false);
   };
 
   const deleteCategory = (id: string) => {
@@ -171,9 +213,13 @@ export default function ScorekeeperPage() {
     setEditingCategoryId(null);
   };
 
-  const setIncrement = (categoryId: string, increment: number) => {
+  const cycleIncrement = (categoryId: string, current: number) => {
+    const idx = INCREMENT_PRESETS.indexOf(current);
+    const next = idx === -1 || idx === INCREMENT_PRESETS.length - 1
+      ? INCREMENT_PRESETS[0]
+      : INCREMENT_PRESETS[idx + 1];
     setCategories((prev) =>
-      prev.map((c) => (c.id === categoryId ? { ...c, increment } : c))
+      prev.map((c) => (c.id === categoryId ? { ...c, increment: next } : c))
     );
   };
 
@@ -237,12 +283,17 @@ export default function ScorekeeperPage() {
     }
   };
 
+  // Players not already in the scorekeeper
+  const availableRegisteredPlayers = registeredPlayers.filter(
+    (p) => !playerNames.includes(p.name)
+  );
+
   return (
     <div className="flex flex-col h-full">
       <div className="ambient-glow" />
 
       {/* Top bar */}
-      <div className="px-3 pt-4 pb-2 bg-gradient-to-b from-background from-60% to-transparent sticky top-0 z-10 flex items-center gap-2">
+      <div className="px-3 pt-4 pb-2 bg-gradient-to-b from-background from-60% to-transparent sticky top-0 z-20 flex items-center gap-2">
         <IconButton onClick={handleBack}>
           <ChevronLeft size={24} />
         </IconButton>
@@ -267,224 +318,195 @@ export default function ScorekeeperPage() {
         </div>
       </div>
 
-      {/* Player header row (sticky under top bar) */}
-      <div className="sticky top-[52px] z-10 bg-gradient-to-b from-background from-80% to-transparent px-2 pb-2">
-        <div className="flex items-center gap-1 overflow-x-auto">
-          {/* Add category button */}
+      {/* Table area */}
+      <div className="flex-1 flex flex-col overflow-hidden relative z-[1]">
+        {/* Table controls row */}
+        <div className="px-3 py-2 flex items-center justify-between shrink-0">
+          <span className="text-xs text-text-secondary">
+            {categories.length} {categories.length === 1 ? 'category' : 'categories'}
+          </span>
           <button
-            onClick={addCategory}
-            className="shrink-0 flex items-center gap-1 text-xs text-primary glass-pill px-2 py-1.5 rounded-lg"
+            onClick={() => setAddCategorySheetOpen(true)}
+            className="flex items-center gap-1 text-xs text-primary glass-pill px-3 py-1.5 rounded-full"
           >
-            <Plus size={12} />
-            Cat
+            <Plus size={12} /> Category
           </button>
-
-          {/* Player name inputs */}
-          {playerNames.map((name, idx) => (
-            <div key={idx} className="flex items-center gap-0.5 min-w-[80px] max-w-[110px]">
-              <input
-                type="text"
-                placeholder={`P${idx + 1}`}
-                value={name}
-                onChange={(e) => updatePlayerName(idx, e.target.value)}
-                className="flex-1 min-w-0 glass-input rounded-lg px-2 py-1 text-xs font-medium text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
-              />
-              {playerNames.length > 1 && (
-                <button
-                  onClick={() => removePlayer(idx)}
-                  className="text-text-secondary/40 hover:text-danger transition-colors shrink-0"
-                >
-                  <X size={12} />
-                </button>
-              )}
-            </div>
-          ))}
-
-          {/* Add player button */}
-          {playerNames.length < 8 && (
-            <button
-              onClick={addPlayer}
-              className="shrink-0 w-7 h-7 rounded-full glass flex items-center justify-center text-primary"
-            >
-              <Plus size={14} />
-            </button>
-          )}
         </div>
-      </div>
 
-      {/* Score table */}
-      <div className="flex-1 overflow-y-auto relative z-[1] px-2">
-        <div className="flex flex-col gap-2 pb-4">
-          {categories.map((cat) => (
-            <div key={cat.id} className="glass rounded-2xl overflow-hidden">
-              {/* Category header row */}
-              <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1.5 border-b border-white/5">
-                {/* Category name */}
-                {editingCategoryId === cat.id ? (
-                  <input
-                    type="text"
-                    value={editingCategoryName}
-                    onChange={(e) => setEditingCategoryName(e.target.value)}
-                    onBlur={commitCategoryName}
-                    onKeyDown={(e) => e.key === 'Enter' && commitCategoryName()}
-                    autoFocus
-                    className="flex-1 min-w-0 text-sm font-semibold text-text-primary bg-transparent focus:outline-none border-b border-primary"
-                  />
-                ) : (
-                  <button
-                    onClick={() => startEditCategoryName(cat)}
-                    className="flex-1 min-w-0 text-sm font-semibold text-text-primary text-left truncate"
+        {/* Scrollable table wrapper */}
+        <div className="flex-1 overflow-auto">
+          <table className="min-w-max w-full border-collapse">
+            <thead className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+              <tr>
+                {/* Player column header */}
+                <th className="sticky left-0 z-20 bg-background/90 backdrop-blur-sm min-w-[120px] px-3 py-2 text-left text-xs font-semibold text-text-secondary uppercase">
+                  Player
+                </th>
+                {/* Category headers */}
+                {categories.map((cat) => (
+                  <th
+                    key={cat.id}
+                    className="min-w-[90px] px-2 py-2 text-center align-top"
                   >
-                    {cat.name}
-                  </button>
-                )}
-
-                {/* Delete category */}
-                {categories.length > 1 && (
-                  <button
-                    onClick={() => deleteCategory(cat.id)}
-                    className="text-text-secondary/40 hover:text-danger transition-colors"
-                  >
-                    <X size={14} />
-                  </button>
-                )}
-
-                {/* Increment selector */}
-                <div className="flex items-center gap-1 ml-1">
-                  {INCREMENT_PRESETS.map((inc) => (
-                    <button
-                      key={inc}
-                      onClick={() => setIncrement(cat.id, inc)}
-                      className={`w-7 h-6 rounded text-[10px] font-medium transition-all ${
-                        cat.increment === inc
-                          ? 'bg-primary text-white'
-                          : 'glass-pill text-text-secondary'
-                      }`}
-                    >
-                      {inc}
-                    </button>
-                  ))}
-                  {/* Custom increment */}
-                  {customIncrementCategoryId === cat.id ? (
-                    <input
-                      type="number"
-                      value={customIncrementValue}
-                      onChange={(e) => setCustomIncrementValue(e.target.value)}
-                      onBlur={() => {
-                        const n = parseInt(customIncrementValue, 10);
-                        if (!isNaN(n) && n > 0) setIncrement(cat.id, n);
-                        setCustomIncrementCategoryId(null);
-                        setCustomIncrementValue('');
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          const n = parseInt(customIncrementValue, 10);
-                          if (!isNaN(n) && n > 0) setIncrement(cat.id, n);
-                          setCustomIncrementCategoryId(null);
-                          setCustomIncrementValue('');
-                        }
-                      }}
-                      autoFocus
-                      className="w-10 text-[10px] glass-input rounded px-1 py-0.5 focus:outline-none text-text-primary"
-                    />
-                  ) : (
-                    <button
-                      onClick={() => {
-                        setCustomIncrementCategoryId(cat.id);
-                        setCustomIncrementValue('');
-                      }}
-                      className="w-7 h-6 rounded glass-pill flex items-center justify-center"
-                    >
-                      <Pencil size={10} className="text-text-secondary" />
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Score cells row */}
-              <div className="flex items-center gap-1 px-2 py-2">
-                {/* Left spacer to align with category name column */}
-                <div className="w-0" />
-
-                {playerNames.map((playerName, idx) => {
-                  const score = getScore(playerName, cat.id);
-                  const isEditing =
-                    editingScore?.playerName === playerName &&
-                    editingScore?.categoryId === cat.id;
-
-                  return (
-                    <div
-                      key={idx}
-                      className="flex-1 flex items-center justify-center gap-1"
-                    >
+                    <div className="flex flex-col items-center gap-1">
+                      <div className="flex items-center gap-1 justify-center w-full">
+                        {editingCategoryId === cat.id ? (
+                          <input
+                            type="text"
+                            value={editingCategoryName}
+                            onChange={(e) => setEditingCategoryName(e.target.value)}
+                            onBlur={commitCategoryName}
+                            onKeyDown={(e) => e.key === 'Enter' && commitCategoryName()}
+                            autoFocus
+                            className="w-full text-xs font-semibold text-text-primary bg-transparent focus:outline-none border-b border-primary text-center"
+                          />
+                        ) : (
+                          <button
+                            onClick={() => startEditCategoryName(cat)}
+                            className="text-xs font-semibold text-text-primary truncate max-w-[70px]"
+                          >
+                            {cat.name}
+                          </button>
+                        )}
+                        {categories.length > 1 && (
+                          <button
+                            onClick={() => deleteCategory(cat.id)}
+                            className="text-text-secondary/40 hover:text-danger transition-colors shrink-0"
+                          >
+                            <X size={10} />
+                          </button>
+                        )}
+                      </div>
+                      {/* Increment badge */}
                       <button
-                        onClick={() => changeScore(playerName, cat.id, -cat.increment)}
-                        className="w-8 h-8 rounded-full glass-light flex items-center justify-center text-text-secondary active:scale-90 transition-all shrink-0"
+                        onClick={() => cycleIncrement(cat.id, cat.increment)}
+                        className="text-[10px] font-medium glass-pill px-1.5 py-0.5 rounded-full text-text-secondary"
                       >
-                        <Minus size={14} />
-                      </button>
-                      {isEditing ? (
-                        <input
-                          type="number"
-                          value={editingScoreValue}
-                          onChange={(e) => setEditingScoreValue(e.target.value)}
-                          onBlur={() => {
-                            const n = parseInt(editingScoreValue, 10);
-                            if (!isNaN(n)) setScoreDirect(playerName, cat.id, n);
-                            setEditingScore(null);
-                          }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                              const n = parseInt(editingScoreValue, 10);
-                              if (!isNaN(n)) setScoreDirect(playerName, cat.id, n);
-                              setEditingScore(null);
-                            }
-                          }}
-                          autoFocus
-                          className="w-14 text-center text-lg font-bold text-text-primary glass-input rounded-lg focus:outline-none py-0.5"
-                        />
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setEditingScore({ playerName, categoryId: cat.id });
-                            setEditingScoreValue(String(score));
-                          }}
-                          className="min-w-[40px] text-center text-lg font-bold text-text-primary"
-                        >
-                          {score}
-                        </button>
-                      )}
-                      <button
-                        onClick={() => changeScore(playerName, cat.id, cat.increment)}
-                        className="w-8 h-8 rounded-full glass-light flex items-center justify-center text-text-secondary active:scale-90 transition-all shrink-0"
-                      >
-                        <Plus size={14} />
+                        ×{cat.increment}
                       </button>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-
-          {/* Totals row */}
-          {playerNames.length > 0 && categories.length > 1 && (
-            <div className="glass-light rounded-2xl px-3 py-2 flex items-center">
-              <span className="text-xs font-semibold text-text-secondary flex-shrink-0 w-16">TOTAL</span>
-              <div className="flex-1 flex">
-                {playerNames.map((name, idx) => (
-                  <div key={idx} className="flex-1 text-center">
-                    <span className="text-base font-bold text-primary">{getTotal(name)}</span>
-                  </div>
+                  </th>
                 ))}
-              </div>
-            </div>
-          )}
+                {/* Total column header */}
+                <th className="sticky right-0 z-20 bg-background/90 backdrop-blur-sm min-w-[60px] px-2 py-2 text-right text-xs font-semibold text-text-secondary uppercase">
+                  Total
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {playerNames.map((playerName, idx) => (
+                <tr key={idx} className="border-t border-white/5">
+                  {/* Player name cell — sticky left */}
+                  <td className="sticky left-0 z-10 bg-background/90 backdrop-blur-sm px-2 py-3">
+                    <div className="flex items-center gap-1">
+                      {/* Color dot */}
+                      <span
+                        className="inline-block w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: playerColors[playerName] ?? 'rgba(128,128,128,0.4)' }}
+                      />
+                      {/* Name input */}
+                      <input
+                        type="text"
+                        placeholder={`Player ${idx + 1}`}
+                        value={playerName}
+                        onChange={(e) => updatePlayerName(idx, e.target.value)}
+                        className="bg-transparent text-sm font-medium text-text-primary focus:outline-none w-[80px] placeholder:text-text-secondary/50"
+                      />
+                      {/* Remove */}
+                      {playerNames.length > 1 && (
+                        <button
+                          onClick={() => removePlayer(idx)}
+                          className="ml-0.5 text-text-secondary/50 hover:text-danger transition-colors shrink-0"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+
+                  {/* Score cells */}
+                  {categories.map((cat) => {
+                    const score = getScore(playerName, cat.id);
+                    const isEditing =
+                      editingScore?.playerName === playerName &&
+                      editingScore?.categoryId === cat.id;
+
+                    return (
+                      <td key={cat.id} className="px-2 py-3 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => changeScore(playerName, cat.id, -cat.increment)}
+                            className="w-6 h-6 rounded-full glass-pill flex items-center justify-center text-text-secondary active:scale-90 transition-all shrink-0"
+                          >
+                            −
+                          </button>
+                          {isEditing ? (
+                            <input
+                              type="number"
+                              className="glass-input rounded-lg w-16 text-center text-sm font-bold text-text-primary focus:outline-none py-0.5"
+                              autoFocus
+                              value={editingScoreValue}
+                              onChange={(e) => setEditingScoreValue(e.target.value)}
+                              onBlur={() => {
+                                const n = parseInt(editingScoreValue, 10);
+                                if (!isNaN(n)) setScoreDirect(playerName, cat.id, n);
+                                setEditingScore(null);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  const n = parseInt(editingScoreValue, 10);
+                                  if (!isNaN(n)) setScoreDirect(playerName, cat.id, n);
+                                  setEditingScore(null);
+                                }
+                              }}
+                            />
+                          ) : (
+                            <button
+                              onClick={() => {
+                                setEditingScore({ playerName, categoryId: cat.id });
+                                setEditingScoreValue(String(score));
+                              }}
+                              className="min-w-[40px] text-center font-bold text-text-primary text-base"
+                            >
+                              {score}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => changeScore(playerName, cat.id, cat.increment)}
+                            className="w-6 h-6 rounded-full glass-pill flex items-center justify-center text-text-secondary active:scale-90 transition-all shrink-0"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>
+                    );
+                  })}
+
+                  {/* Total cell — sticky right */}
+                  <td className="sticky right-0 z-10 bg-background/90 backdrop-blur-sm px-2 py-3 text-right font-bold text-text-primary">
+                    {getTotal(playerName)}
+                  </td>
+                </tr>
+              ))}
+
+              {/* Add player row */}
+              <tr>
+                <td colSpan={categories.length + 2} className="px-3 py-2">
+                  <button
+                    onClick={() => setAddPlayerSheetOpen(true)}
+                    className="flex items-center gap-1.5 text-sm text-primary glass-pill px-3 py-1.5 rounded-full"
+                  >
+                    <Plus size={14} /> Add Player
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
       {/* Bottom bar */}
-      <div className="bg-gradient-to-t from-background from-60% to-transparent px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2 relative z-10">
+      <div className="bg-gradient-to-t from-background from-60% to-transparent px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] flex gap-2 relative z-10 shrink-0">
         {gameId && (
           <>
             <Button
@@ -508,6 +530,159 @@ export default function ScorekeeperPage() {
           </Button>
         )}
       </div>
+
+      {/* Add Category Sheet */}
+      <AnimatePresence>
+        {addCategorySheetOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+              onClick={() => setAddCategorySheetOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={spring}
+              className="fixed inset-x-0 bottom-0 z-50 glass-strong rounded-t-2xl px-4 pt-4 pb-[max(2rem,env(safe-area-inset-bottom))]"
+            >
+              <div className="flex justify-center mb-3">
+                <div className="w-10 h-1 rounded-full bg-text-secondary/30" />
+              </div>
+              <h2 className="text-lg font-bold text-text-primary mb-4">New Category</h2>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-text-secondary">Category name</label>
+                  <input
+                    type="text"
+                    placeholder="VP, Gold, Stars..."
+                    value={newCatName}
+                    onChange={(e) => setNewCatName(e.target.value)}
+                    autoFocus
+                    className="w-full rounded-xl glass-input px-4 py-3 text-base text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-medium text-text-secondary">Increment</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {INCREMENT_PRESETS.map((inc) => (
+                      <button
+                        key={inc}
+                        onClick={() => { setNewCatIncrement(inc); setNewCatUseCustom(false); }}
+                        className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                          !newCatUseCustom && newCatIncrement === inc
+                            ? 'bg-primary text-white tag-glow'
+                            : 'glass-pill text-text-secondary'
+                        }`}
+                      >
+                        {inc}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setNewCatUseCustom(true)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                        newCatUseCustom
+                          ? 'bg-primary text-white tag-glow'
+                          : 'glass-pill text-text-secondary'
+                      }`}
+                    >
+                      Custom
+                    </button>
+                  </div>
+                  {newCatUseCustom && (
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      placeholder="e.g. 25"
+                      value={newCatCustomIncrement}
+                      onChange={(e) => setNewCatCustomIncrement(e.target.value)}
+                      className="w-full rounded-xl glass-input px-4 py-3 text-base text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
+                    />
+                  )}
+                </div>
+                <Button className="w-full" size="lg" onClick={addCategoryFromSheet}>
+                  Add
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Add Player Sheet */}
+      <AnimatePresence>
+        {addPlayerSheetOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+              onClick={() => setAddPlayerSheetOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={spring}
+              className="fixed inset-x-0 bottom-0 z-50 glass-strong rounded-t-2xl px-4 pt-4 pb-[max(2rem,env(safe-area-inset-bottom))] max-h-[75vh] overflow-y-auto"
+            >
+              <div className="flex justify-center mb-3">
+                <div className="w-10 h-1 rounded-full bg-text-secondary/30" />
+              </div>
+              <h2 className="text-lg font-bold text-text-primary mb-4">Add Player</h2>
+
+              {availableRegisteredPlayers.length > 0 && (
+                <div className="flex flex-col gap-2 mb-4">
+                  {availableRegisteredPlayers.map((p) => (
+                    <button
+                      key={p.id}
+                      onClick={() => addRegisteredPlayer(p.name, p.color)}
+                      className="flex items-center gap-3 rounded-xl glass px-4 py-3 text-left active:scale-[0.98] transition-all"
+                    >
+                      <span
+                        className="inline-block w-3 h-3 rounded-full shrink-0"
+                        style={{ backgroundColor: p.color }}
+                      />
+                      <span className="text-sm font-medium text-text-primary">{p.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {availableRegisteredPlayers.length > 0 && (
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-white/10" />
+                  <span className="text-xs text-text-secondary">or add a guest</span>
+                  <div className="flex-1 h-px bg-white/10" />
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3">
+                <input
+                  type="text"
+                  placeholder="Guest name"
+                  value={guestPlayerName}
+                  onChange={(e) => setGuestPlayerName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addGuestPlayer(guestPlayerName)}
+                  className="w-full rounded-xl glass-input px-4 py-3 text-base text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
+                />
+                <Button
+                  className="w-full"
+                  size="lg"
+                  onClick={() => addGuestPlayer(guestPlayerName)}
+                  disabled={!guestPlayerName.trim()}
+                >
+                  Add Guest
+                </Button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* End Game Sheet */}
       <AnimatePresence>

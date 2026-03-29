@@ -62,6 +62,14 @@ export default function SessionDetail({ session }: SessionDetailProps) {
     setEditingNotes(false);
   };
 
+  const hasScoreData = session.categories.length > 0 && session.playerScores.length > 0;
+
+  const getPlayerTotal = (playerName: string) =>
+    session.categories.reduce((sum, cat) => {
+      const ps = session.playerScores.find((p) => p.playerName === playerName);
+      return sum + (ps?.scores[cat.id] ?? 0);
+    }, 0);
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.82, y: 40 }}
@@ -121,53 +129,49 @@ export default function SessionDetail({ session }: SessionDetailProps) {
           {/* Scores table */}
           {session.playerNames.length > 0 && (
             <div className="glass rounded-2xl overflow-hidden">
-              {/* Header */}
-              <div className="flex px-3 py-2 border-b border-white/5">
-                <div className="flex-1 text-xs font-semibold text-text-secondary">Category</div>
-                {session.playerNames.map((name) => (
-                  <div key={name} className="w-16 text-center text-xs font-semibold text-text-secondary truncate">
-                    {name}
-                  </div>
-                ))}
-              </div>
-
-              {session.categories.length > 0 ? (
-                session.categories.map((cat) => (
-                  <div key={cat.id} className="flex px-3 py-2 border-b border-white/5 last:border-0">
-                    <div className="flex-1 text-sm text-text-primary">{cat.name}</div>
-                    {session.playerNames.map((name) => {
-                      const ps = session.playerScores.find((p) => p.playerName === name);
-                      const score = ps?.scores[cat.id] ?? 0;
-                      return (
-                        <div key={name} className="w-16 text-center text-sm font-medium text-text-primary">
-                          {score}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))
+              {hasScoreData ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-max w-full border-collapse">
+                    <thead>
+                      <tr className="border-b border-white/5">
+                        <th className="px-3 py-2 text-left text-xs font-semibold text-text-secondary min-w-[100px]">
+                          Player
+                        </th>
+                        {session.categories.map((cat) => (
+                          <th key={cat.id} className="px-3 py-2 text-center text-xs font-semibold text-text-secondary min-w-[60px]">
+                            {cat.name}
+                          </th>
+                        ))}
+                        <th className="px-3 py-2 text-right text-xs font-semibold text-text-secondary min-w-[55px]">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {session.playerNames.map((name) => {
+                        const ps = session.playerScores.find((p) => p.playerName === name);
+                        return (
+                          <tr key={name} className="border-t border-white/5">
+                            <td className="px-3 py-2 text-sm font-medium text-text-primary">
+                              {name}
+                            </td>
+                            {session.categories.map((cat) => (
+                              <td key={cat.id} className="px-3 py-2 text-center text-sm text-text-primary">
+                                {ps?.scores[cat.id] ?? 0}
+                              </td>
+                            ))}
+                            <td className="px-3 py-2 text-right text-sm font-bold text-primary">
+                              {getPlayerTotal(name)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
                 <div className="px-3 py-4 text-xs text-text-secondary text-center">
                   No scores yet — resume to start tracking
-                </div>
-              )}
-
-              {/* Totals */}
-              {session.categories.length > 1 && (
-                <div className="flex px-3 py-2 bg-white/5">
-                  <div className="flex-1 text-xs font-bold text-text-secondary">TOTAL</div>
-                  {session.playerNames.map((name) => {
-                    const ps = session.playerScores.find((p) => p.playerName === name);
-                    const total = session.categories.reduce(
-                      (sum, cat) => sum + (ps?.scores[cat.id] ?? 0),
-                      0
-                    );
-                    return (
-                      <div key={name} className="w-16 text-center text-sm font-bold text-primary">
-                        {total}
-                      </div>
-                    );
-                  })}
                 </div>
               )}
             </div>
