@@ -223,9 +223,15 @@ export default function ScorekeeperPage() {
     );
   };
 
-  // Totals per player
-  const getTotal = (playerName: string) =>
-    categories.reduce((sum, cat) => sum + getScore(playerName, cat.id), 0);
+  // Row color tint from player's registered color
+  const rowBg = (playerName: string, opacity: number) => {
+    const hex = playerColors[playerName];
+    if (!hex) return undefined;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  };
 
   // Build PlayerScore array from current state
   const buildPlayerScores = (): PlayerScore[] => {
@@ -387,17 +393,13 @@ export default function ScorekeeperPage() {
                     </div>
                   </th>
                 ))}
-                {/* Total column header */}
-                <th className="sticky right-0 z-20 bg-[var(--glass-bg)] backdrop-blur-2xl min-w-[60px] px-2 py-2 text-right text-xs font-semibold text-text-secondary uppercase">
-                  Total
-                </th>
               </tr>
             </thead>
             <tbody>
               {playerNames.map((playerName, idx) => (
-                <tr key={idx} className="border-t border-white/5">
+                <tr key={idx} className="border-t border-white/5" style={{ backgroundColor: rowBg(playerName, 0.07) }}>
                   {/* Player name cell — sticky left */}
-                  <td className="sticky left-0 z-10 bg-[var(--glass-bg)] backdrop-blur-2xl px-2 py-3">
+                  <td className="sticky left-0 z-10 backdrop-blur-2xl px-2 py-3" style={{ backgroundColor: rowBg(playerName, 0.25) ?? 'var(--glass-bg)' }}>
                     <div className="flex items-center gap-1">
                       {/* Color dot */}
                       <span
@@ -482,16 +484,12 @@ export default function ScorekeeperPage() {
                     );
                   })}
 
-                  {/* Total cell — sticky right */}
-                  <td className="sticky right-0 z-10 bg-[var(--glass-bg)] backdrop-blur-2xl px-2 py-3 text-right font-bold text-text-primary">
-                    {getTotal(playerName)}
-                  </td>
                 </tr>
               ))}
 
               {/* Add player row */}
               <tr>
-                <td colSpan={categories.length + 2} className="px-3 py-2">
+                <td colSpan={categories.length + 1} className="px-3 py-2">
                   <button
                     onClick={() => setAddPlayerSheetOpen(true)}
                     className="flex items-center gap-1.5 text-sm text-primary glass-pill px-3 py-1.5 rounded-full"
