@@ -36,12 +36,6 @@ export default function WishlistPage() {
               </span>
             )}
           </div>
-          <button
-            onClick={() => navigate('/wishlist/new')}
-            className="flex items-center justify-center w-9 h-9 rounded-full glass-pill text-text-secondary hover:text-primary transition-colors"
-          >
-            <Plus size={20} />
-          </button>
         </div>
 
         {/* Filter pills */}
@@ -65,7 +59,7 @@ export default function WishlistPage() {
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto p-4 pb-24">
+      <div className="flex-1 overflow-y-auto px-4 pb-24">
         {items.length === 0 ? (
           <EmptyState
             icon={<Bookmark size={48} strokeWidth={1.5} />}
@@ -78,13 +72,21 @@ export default function WishlistPage() {
             description="No items match the selected filter."
           />
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-2 gap-3">
             {filtered.map((item) => (
               <WishlistItemCard key={item.id} item={item} />
             ))}
           </div>
         )}
       </div>
+
+      {/* FAB */}
+      <button
+        onClick={() => navigate('/wishlist/new')}
+        className="fixed bottom-24 right-4 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center fab-halo active:scale-95 transition-transform z-30"
+      >
+        <Plus size={24} />
+      </button>
     </div>
   );
 }
