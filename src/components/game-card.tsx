@@ -52,31 +52,36 @@ export default function GameCard({ game, disableNav = false }: GameCardProps) {
       </div>
 
       {/* Info */}
-      <div className="p-3 flex flex-col gap-1.5 flex-1">
+      <div className="p-3 flex flex-col gap-2 flex-1">
+        {/* Row 1: Name */}
         <h3 className="text-sm font-semibold text-text-primary truncate">
           {game.name}
         </h3>
 
+        {/* Row 2: Players + Time */}
         <div className="flex items-center gap-3 text-text-secondary">
           <span className="inline-flex items-center gap-1 text-xs">
             <Users size={12} />
             {game.minPlayers === game.maxPlayers
               ? game.minPlayers
-              : `${game.minPlayers}-${game.maxPlayers}`}
+              : `${game.minPlayers}–${game.maxPlayers}`}
           </span>
           <span className="inline-flex items-center gap-1 text-xs">
             <Clock size={12} />
             {game.playTimeMinutes}m
           </span>
-          <ComplexityDots value={game.complexity} size="sm" />
         </div>
 
+        {/* Row 3: Complexity */}
+        <ComplexityDots value={game.complexity} size="sm" />
+
+        {/* Row 4: Tags */}
         {displayTags.length > 0 && (
-          <div className="flex gap-1 mt-0.5 overflow-hidden">
+          <div className="flex gap-1 flex-wrap">
             {displayTags.map((tag) => (
               <span
                 key={tag!.id}
-                className="rounded-full bg-surface-light px-2 py-0.5 text-[10px] text-text-secondary truncate"
+                className="rounded-full bg-surface-light px-2 py-0.5 text-[10px] text-text-secondary"
               >
                 {tag!.name}
               </span>

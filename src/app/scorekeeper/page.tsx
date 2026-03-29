@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, Plus, X } from 'lucide-react';
+import { ChevronLeft, Plus, X, Minus } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore, usePlayLogStore, useSessionStore, usePlayerStore } from '../../stores';
 import type { ScoreCategory, PlayerScore } from '../../types';
-import { useScrollLock } from '../../lib/use-scroll-lock';
 import Button from '../../components/ui/button';
 import ConfirmDialog from '../../components/ui/confirm-dialog';
 import IconButton from '../../components/ui/icon-button';
@@ -33,8 +32,8 @@ export default function ScorekeeperPage() {
 
   // Local state
   const [playerNames, setPlayerNames] = useState<string[]>(() => {
-    if (existingSession) return existingSession.playerNames;
-    return [];
+    if (existingSession) return existingSession.playerNames.length >= 2 ? existingSession.playerNames : [...existingSession.playerNames, ...Array(2 - existingSession.playerNames.length).fill('')];
+    return ['', ''];
   });
   const [categories, setCategories] = useState<ScoreCategory[]>(() => {
     if (existingSession?.categories?.length) return existingSession.categories;
@@ -50,6 +49,8 @@ export default function ScorekeeperPage() {
     }
     return {};
   });
+  const [round, setRound] = useState(() => existingSession?.round ?? 1);
+
   // Player colors — track which player names came from player store
   const [playerColors, setPlayerColors] = useState<Record<string, string>>({});
 
@@ -57,7 +58,6 @@ export default function ScorekeeperPage() {
   const [addCategorySheetOpen, setAddCategorySheetOpen] = useState(false);
   const [addPlayerSheetOpen, setAddPlayerSheetOpen] = useState(false);
   const [endSheetOpen, setEndSheetOpen] = useState(false);
-  useScrollLock(addCategorySheetOpen || addPlayerSheetOpen || endSheetOpen);
 
   // End game state
   const [winnerName, setWinnerName] = useState<string | null>(null);
@@ -250,7 +250,7 @@ export default function ScorekeeperPage() {
       playerNames: validPlayerNames,
       categories,
       playerScores: buildPlayerScores(),
-      round: 1,
+      round,
       notes: '',
     };
     if (sessionId && existingSession) {
@@ -306,6 +306,22 @@ export default function ScorekeeperPage() {
         <h1 className="flex-1 text-center text-base font-semibold text-text-primary truncate">
           {game?.name ?? 'Scorekeeper'}
         </h1>
+        {/* Round counter */}
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setRound((r) => Math.max(1, r - 1))}
+            className="w-7 h-7 rounded-full glass flex items-center justify-center text-text-secondary active:scale-90 transition-all"
+          >
+            <Minus size={14} />
+          </button>
+          <span className="text-sm font-bold text-text-primary w-12 text-center">Rd {round}</span>
+          <button
+            onClick={() => setRound((r) => r + 1)}
+            className="w-7 h-7 rounded-full glass flex items-center justify-center text-text-secondary active:scale-90 transition-all"
+          >
+            <Plus size={14} />
+          </button>
+        </div>
       </div>
 
       {/* Table area */}
