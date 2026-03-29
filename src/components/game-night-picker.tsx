@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import { X, Minus, Plus, Dices, Shuffle, Share2 } from 'lucide-react';
+import { X, Minus, Plus, Dices, Shuffle, Share2, ChevronDown, ChevronUp } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore, useTagStore, SYSTEM_TAG_IDS } from '../stores';
@@ -38,6 +38,7 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [pickedGame, setPickedGame] = useState<BoardGame | null>(null);
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle');
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
   useScrollLock(open);
 
   const filterableTags = useMemo(
@@ -176,29 +177,36 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
                 </div>
               </div>
 
-              {/* Tag Filter Chips */}
-              {filterableTags.length > 0 && (
-                <div className="mb-4">
-                  <span className="text-sm font-medium text-text-secondary block mb-2">
-                    Tags
-                  </span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {filterableTags.map((tag) => (
-                      <button
-                        key={tag.id}
-                        onClick={() => toggleTag(tag.id)}
-                        className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
-                          selectedTagIds.includes(tag.id)
-                            ? 'bg-primary text-white tag-glow'
-                            : 'glass-pill text-text-secondary'
-                        }`}
-                      >
-                        {tag.name}
-                      </button>
-                    ))}
+              {/* More filters collapsible */}
+              <div className="mb-4">
+                <button
+                  onClick={() => setShowMoreFilters((v) => !v)}
+                  className="flex items-center justify-between w-full text-sm font-medium text-text-secondary glass-pill px-4 py-2.5 rounded-xl"
+                >
+                  <span>More Filters</span>
+                  {showMoreFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+                {showMoreFilters && filterableTags.length > 0 && (
+                  <div className="mt-3">
+                    <span className="text-xs text-text-secondary block mb-2">Tags</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {filterableTags.map((tag) => (
+                        <button
+                          key={tag.id}
+                          onClick={() => toggleTag(tag.id)}
+                          className={`rounded-full px-3 py-1 text-xs font-medium transition-all ${
+                            selectedTagIds.includes(tag.id)
+                              ? 'bg-primary text-white tag-glow'
+                              : 'glass-pill text-text-secondary'
+                          }`}
+                        >
+                          {tag.name}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
               {/* Actions row */}
               <div className="flex gap-2 mb-4">
@@ -208,7 +216,7 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
                   className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-primary text-white py-3 font-medium active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
                 >
                   <Shuffle size={18} />
-                  Pick! ({results.length})
+                  Pick one ({results.length})
                 </button>
 
                 {results.length > 0 && (
@@ -267,7 +275,7 @@ export default function GameNightPicker({ open, onClose }: GameNightPickerProps)
 
               {/* Results List */}
               <div className="flex flex-col gap-1">
-                {results.map((game) => (
+                {results.slice(0, 5).map((game) => (
                   <button
                     key={game.id}
                     onClick={() => handleSelectGame(game)}
