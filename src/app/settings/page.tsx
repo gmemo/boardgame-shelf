@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Moon, Sun, Download, Upload, Check, Heart, Plus, Pencil, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePreferencesStore, usePlayerStore } from '../../stores';
@@ -57,6 +57,7 @@ export default function SettingsPage() {
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
   const [deletePlayerTarget, setDeletePlayerTarget] = useState<Player | null>(null);
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleImport = async () => {
     setImportError(null);
@@ -158,6 +159,33 @@ export default function SettingsPage() {
                   </AnimatePresence>
                 </button>
               ))}
+              {/* Custom swatch */}
+              <button
+                onClick={() => colorInputRef.current?.click()}
+                className="relative w-10 h-10 rounded-full transition-transform overflow-hidden"
+                style={{
+                  background: preferences.accentColor.startsWith('#')
+                    ? preferences.accentColor
+                    : 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)',
+                  transform: preferences.accentColor.startsWith('#') ? 'scale(1.15)' : 'scale(1)',
+                }}
+                title="Custom color"
+              >
+                {preferences.accentColor.startsWith('#') && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Check size={18} className="text-white drop-shadow" />
+                  </div>
+                )}
+              </button>
+              <input
+                ref={colorInputRef}
+                type="color"
+                className="sr-only"
+                value={
+                  preferences.accentColor.startsWith('#') ? preferences.accentColor : '#6366F1'
+                }
+                onChange={(e) => setPreferences({ accentColor: e.target.value })}
+              />
             </div>
           </div>
         </section>

@@ -27,7 +27,20 @@ function useApplyTheme() {
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute('data-theme', preferences.theme);
-    root.setAttribute('data-accent', preferences.accentColor);
+
+    const accentColor = preferences.accentColor;
+    if (accentColor.startsWith('#')) {
+      // Custom hex color: compute RGB components and set CSS var directly
+      const r = parseInt(accentColor.slice(1, 3), 16);
+      const g = parseInt(accentColor.slice(3, 5), 16);
+      const b = parseInt(accentColor.slice(5, 7), 16);
+      root.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+      root.removeAttribute('data-accent');
+    } else {
+      // Named preset: use data-accent attribute (existing CSS handles the rest)
+      root.setAttribute('data-accent', accentColor);
+      root.style.removeProperty('--primary-rgb');
+    }
 
     const themeColor = preferences.theme === 'dark' ? '#0c0c10' : '#FAFAFA';
     document
