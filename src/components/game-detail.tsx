@@ -57,7 +57,7 @@ export default function GameDetail({ game }: GameDetailProps) {
       initial={{ opacity: 0, scale: 0.82, y: 40 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ type: 'spring', stiffness: 260, damping: 28 }}
-      className="flex flex-col h-full bg-background"
+      className="flex flex-col h-full"
     >
       {/* Top action bar */}
       <div className="flex items-center justify-between px-3 pt-4 pb-2 relative z-10">

@@ -28,7 +28,7 @@ function useApplyTheme() {
     root.setAttribute('data-theme', preferences.theme);
     root.setAttribute('data-accent', preferences.accentColor);
 
-    const themeColor = preferences.theme === 'dark' ? '#09090B' : '#FAFAFA';
+    const themeColor = preferences.theme === 'dark' ? '#0c0c10' : '#FAFAFA';
     document
       .querySelector('meta[name="theme-color"]')
       ?.setAttribute('content', themeColor);

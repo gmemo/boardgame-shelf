@@ -179,7 +179,7 @@ export default function WelcomePage() {
       </motion.div>
 
       {/* Sticky CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-10 pb-8 pt-16 px-6 bg-gradient-to-t from-background from-50% to-transparent">
+      <div className="fixed bottom-0 left-0 right-0 z-10 pb-8 pt-16 px-6">
         <motion.button
           onClick={handleStart}
           className="w-full py-4 rounded-2xl bg-primary depth-3 text-background font-semibold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition-transform"

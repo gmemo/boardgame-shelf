@@ -73,7 +73,7 @@ export default function PlayLogForm({ gameId, onComplete }: PlayLogFormProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full">
       {/* Header */}
       <div className="glass-strong px-4 py-3 flex items-center gap-3">
         <button onClick={handleBack} className="text-text-secondary">

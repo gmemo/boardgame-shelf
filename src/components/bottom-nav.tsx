@@ -38,6 +38,13 @@ export default function BottomNav() {
   const hasActiveFilters = search !== '' || tagIds.length > 0;
   const searchActive = isSearchOpen && isCollectionTab;
 
+  // Fix iOS PWA: env(safe-area-inset-bottom) not computed for fixed elements until scroll fires
+  useEffect(() => {
+    [50, 150, 400].forEach(delay => {
+      setTimeout(() => window.dispatchEvent(new Event('scroll')), delay);
+    });
+  }, []);
+
   // Auto-close search when navigating away from collection
   useEffect(() => {
     if (!isCollectionTab && isSearchOpen) {
@@ -77,7 +84,7 @@ export default function BottomNav() {
   return (
     <>
       {/* Safe area background fill below nav pill */}
-      <div className="fixed bottom-0 inset-x-0 bg-background z-[49]" style={{ height: 'env(safe-area-inset-bottom)' }} />
+      <div className="fixed bottom-0 inset-x-0 z-[49] safe-bottom-fill" />
 
       {/* Tag filter panel — slides up above nav when search is open */}
       <AnimatePresence>
@@ -87,7 +94,7 @@ export default function BottomNav() {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 80, opacity: 0 }}
             transition={spring}
-            className="fixed bottom-[calc(4.5rem+max(0.75rem,env(safe-area-inset-bottom)))] left-4 right-4 z-40 glass-strong rounded-2xl px-4 py-3"
+            className="fixed left-4 right-4 z-40 glass-strong rounded-2xl px-4 py-3 safe-bottom-filter"
           >
             <TagFilterBar selectedIds={tagIds} onToggle={toggleTagFilter} />
           </motion.div>
@@ -95,7 +102,7 @@ export default function BottomNav() {
       </AnimatePresence>
 
       {/* Bottom bar — flex container: nav pill + search area (always rendered) */}
-      <div className="fixed bottom-0 left-4 right-4 mb-[max(0.25rem,env(safe-area-inset-bottom))] z-50 flex items-center gap-2 h-14">
+      <div className="fixed left-4 right-4 z-50 flex items-center gap-2 h-14 safe-bottom-nav">
 
         {/* Nav pill — shrinks to home button when search active */}
         <nav
