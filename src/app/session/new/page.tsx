@@ -1,9 +1,7 @@
-import { useSearchParams } from 'react-router-dom';
-import SessionForm from '../../../components/session-form';
+import { Navigate } from 'react-router-dom';
 
+// Sessions are now created only via the Scorekeeper's "Pause" action.
+// Redirect to sessions list if accessed directly.
 export default function SessionNewPage() {
-  const [searchParams] = useSearchParams();
-  const gameId = searchParams.get('gameId');
-
-  return <SessionForm initialGameId={gameId ?? null} />;
+  return <Navigate to="/sessions" replace />;
 }

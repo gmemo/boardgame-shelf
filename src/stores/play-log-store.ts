@@ -7,7 +7,8 @@ import { SYSTEM_TAG_IDS } from './tag-store';
 
 interface PlayLogState {
   playLogs: PlayLog[];
-  addPlayLog: (log: Omit<PlayLog, 'id' | 'createdAt'>) => PlayLog;
+  addPlayLog: (log: Omit<PlayLog, 'id' | 'createdAt' | 'updatedAt'>) => PlayLog;
+  updatePlayLog: (id: string, updates: Partial<PlayLog>) => void;
   deletePlayLog: (id: string) => void;
   setPlayLogs: (playLogs: PlayLog[]) => void;
 }
@@ -17,10 +18,14 @@ export const usePlayLogStore = create<PlayLogState>()(
     (set) => ({
       playLogs: [],
       addPlayLog: (log) => {
+        const now = new Date().toISOString();
         const newLog: PlayLog = {
           ...log,
           id: crypto.randomUUID(),
-          createdAt: new Date().toISOString(),
+          categories: log.categories ?? [],
+          playerScores: log.playerScores ?? [],
+          createdAt: now,
+          updatedAt: now,
         };
         set((state) => ({ playLogs: [newLog, ...state.playLogs] }));
 
@@ -34,6 +39,13 @@ export const usePlayLogStore = create<PlayLogState>()(
         }
 
         return newLog;
+      },
+      updatePlayLog: (id, updates) => {
+        set((state) => ({
+          playLogs: state.playLogs.map((l) =>
+            l.id === id ? { ...l, ...updates, updatedAt: new Date().toISOString() } : l
+          ),
+        }));
       },
       deletePlayLog: (id) => {
         set((state) => ({ playLogs: state.playLogs.filter((l) => l.id !== id) }));

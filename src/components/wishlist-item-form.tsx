@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronDown, ChevronUp } from 'lucide-react';
 import type { BoardGame, WishlistItem } from '../types';
 import { useWishlistStore } from '../stores';
 import Button from './ui/button';
@@ -10,6 +10,7 @@ import ToggleGroup from './ui/toggle-group';
 import GamePicker from './game-picker';
 import TagPicker from './tag-picker';
 import IconButton from './ui/icon-button';
+import ImagePicker from './ui/image-picker';
 
 type ItemType = 'game' | 'expansion';
 
@@ -27,7 +28,9 @@ export default function WishlistItemForm({ item }: WishlistItemFormProps) {
   const { addItem, updateItem } = useWishlistStore();
   const isEdit = !!item;
 
+  const [imageUrl, setImageUrl] = useState<string | null>(item?.imageUrl ?? null);
   const [name, setName] = useState(item?.name ?? '');
+  const [showDetails, setShowDetails] = useState(false);
   const [type, setType] = useState<ItemType>(item?.type ?? 'game');
   const [linkedGameId, setLinkedGameId] = useState<string | null>(item?.linkedGameId ?? null);
   const [linkedGameName, setLinkedGameName] = useState<string>('');
@@ -50,6 +53,7 @@ export default function WishlistItemForm({ item }: WishlistItemFormProps) {
 
     const data = {
       name: trimName,
+      imageUrl,
       type,
       linkedGameId: type === 'expansion' ? linkedGameId : null,
       price: price.trim(),
@@ -73,7 +77,7 @@ export default function WishlistItemForm({ item }: WishlistItemFormProps) {
       <div className="ambient-glow" />
 
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 pt-4 pb-3 bg-background sticky top-0 z-10 relative">
+      <div className="flex items-center gap-2 px-4 pt-4 pb-3 bg-gradient-to-b from-background from-60% to-transparent sticky top-0 z-10">
         <IconButton onClick={() => navigate(-1)}>
           <ChevronLeft size={24} />
         </IconButton>
@@ -85,6 +89,10 @@ export default function WishlistItemForm({ item }: WishlistItemFormProps) {
       {/* Form */}
       <div className="flex-1 overflow-y-auto relative z-[1]">
         <div className="flex flex-col gap-5 p-4 pb-28">
+          {/* Image picker — hero element */}
+          <ImagePicker value={imageUrl} onChange={setImageUrl} />
+
+          {/* Name */}
           <Input
             label="Name"
             placeholder="Game or expansion name"
@@ -93,69 +101,79 @@ export default function WishlistItemForm({ item }: WishlistItemFormProps) {
             required
           />
 
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-medium text-text-secondary">Type</label>
-            <ToggleGroup
-              options={TYPE_OPTIONS}
-              value={type}
-              onChange={setType}
-              layoutId="wishlist-type"
-            />
-          </div>
+          {/* More details toggle */}
+          <button
+            onClick={() => setShowDetails((v) => !v)}
+            className="flex items-center gap-1.5 text-sm text-primary self-start"
+          >
+            {showDetails ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {showDetails ? '− Less details' : '+ More details'}
+          </button>
 
-          {/* Linked Game — only for expansions */}
-          {type === 'expansion' && (
-            <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-medium text-text-secondary">
-                Linked Game (optional)
-              </label>
-              <button
-                onClick={() => setShowGamePicker(true)}
-                className="flex items-center gap-3 rounded-xl glass-input px-4 py-3 text-left"
-              >
-                {linkedGameId ? (
-                  <span className="text-sm text-text-primary">
-                    {linkedGameName || 'Selected'}
-                  </span>
-                ) : (
-                  <span className="text-sm text-text-secondary/70">
-                    Select Game (optional)
-                  </span>
-                )}
-              </button>
+          {showDetails && (
+            <div className="flex flex-col gap-5">
+              {/* Type */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-text-secondary">Type</label>
+                <ToggleGroup
+                  options={TYPE_OPTIONS}
+                  value={type}
+                  onChange={setType}
+                  layoutId="wishlist-type"
+                />
+              </div>
+
+              {/* Linked Game — only for expansions */}
+              {type === 'expansion' && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-text-secondary">
+                    Linked Game (optional)
+                  </label>
+                  <button
+                    onClick={() => setShowGamePicker(true)}
+                    className="flex items-center gap-3 rounded-xl glass-input px-4 py-3 text-left"
+                  >
+                    {linkedGameId ? (
+                      <span className="text-sm text-text-primary">{linkedGameName || 'Selected'}</span>
+                    ) : (
+                      <span className="text-sm text-text-secondary/70">Select Game (optional)</span>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              <Input
+                label="Price (optional)"
+                placeholder="e.g. €24.99"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+              />
+
+              <Input
+                label="Store (optional)"
+                placeholder="e.g. Amazon, FLGS"
+                value={store}
+                onChange={(e) => setStore(e.target.value)}
+              />
+
+              <Input
+                label="Link (optional)"
+                type="url"
+                placeholder="https://..."
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
+              />
+
+              <Textarea
+                label="Notes"
+                placeholder="Why you want it, notes..."
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+              />
+
+              <TagPicker selectedIds={tagIds} onChange={setTagIds} />
             </div>
           )}
-
-          <Input
-            label="Price (optional)"
-            placeholder="e.g. €24.99"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-          />
-
-          <Input
-            label="Store (optional)"
-            placeholder="e.g. Amazon, FLGS"
-            value={store}
-            onChange={(e) => setStore(e.target.value)}
-          />
-
-          <Input
-            label="Link (optional)"
-            type="url"
-            placeholder="https://..."
-            value={link}
-            onChange={(e) => setLink(e.target.value)}
-          />
-
-          <Textarea
-            label="Notes"
-            placeholder="Why you want it, notes..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-
-          <TagPicker selectedIds={tagIds} onChange={setTagIds} />
         </div>
       </div>
 

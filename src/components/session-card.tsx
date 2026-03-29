@@ -12,23 +12,12 @@ function formatDate(dateStr: string): string {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-const STATUS_COLORS = {
-  active: 'text-primary bg-primary/10',
-  completed: 'text-text-secondary bg-surface',
-  abandoned: 'text-text-secondary bg-surface',
-};
-
-const STATUS_LABELS = {
-  active: 'Active',
-  completed: 'Completed',
-  abandoned: 'Abandoned',
-};
-
 export default function SessionCard({ session, onClick }: SessionCardProps) {
   const { games } = useGameStore();
   const game = games.find((g) => g.id === session.gameId);
 
   const playerText = session.playerNames.filter(Boolean).join(', ');
+  const totalCategories = session.categories?.length ?? 0;
 
   return (
     <button
@@ -44,21 +33,17 @@ export default function SessionCard({ session, onClick }: SessionCardProps) {
             <p className="text-xs text-text-secondary mt-0.5 truncate">{playerText}</p>
           )}
         </div>
-        <span
-          className={`shrink-0 text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[session.status]}`}
-        >
-          {STATUS_LABELS[session.status]}
+        <span className="shrink-0 text-xs font-medium px-2 py-0.5 rounded-full text-primary bg-primary/10">
+          Paused
         </span>
       </div>
 
       <div className="flex items-center gap-3 mt-2 flex-wrap">
         <span className="text-xs text-text-secondary">{formatDate(session.date)}</span>
-        {session.sessionNumber !== null && (
-          <span className="text-xs text-text-secondary">Session {session.sessionNumber}</span>
-        )}
-        {session.chapter && (
-          <span className="text-xs text-text-secondary truncate max-w-[120px]">
-            {session.chapter}
+        <span className="text-xs text-text-secondary">Round {session.round}</span>
+        {totalCategories > 0 && (
+          <span className="text-xs text-text-secondary">
+            {totalCategories} {totalCategories === 1 ? 'category' : 'categories'}
           </span>
         )}
       </div>

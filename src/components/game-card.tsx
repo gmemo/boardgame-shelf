@@ -6,9 +6,10 @@ import ComplexityDots from './ui/complexity-dots';
 
 interface GameCardProps {
   game: BoardGame;
+  disableNav?: boolean;
 }
 
-export default function GameCard({ game }: GameCardProps) {
+export default function GameCard({ game, disableNav = false }: GameCardProps) {
   const navigate = useNavigate();
   const { tags } = useTagStore();
 
@@ -27,8 +28,8 @@ export default function GameCard({ game }: GameCardProps) {
 
   return (
     <button
-      onClick={() => navigate(`/game/${game.id}`)}
-      className="glass rounded-2xl overflow-hidden text-left transition-all active:scale-[0.97] card-active-glow depth-1 flex flex-col"
+      onClick={() => !disableNav && navigate(`/game/${game.id}`)}
+      className="glass rounded-2xl overflow-hidden text-left transition-all active:scale-[0.97] card-active-glow depth-1 flex flex-col w-full"
     >
       {/* Image */}
       <div className="relative aspect-[3/2] max-h-32 bg-surface overflow-hidden">

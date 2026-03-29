@@ -1,9 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, CalendarPlus, Timer, Swords } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, Play } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { BoardGame } from '../types';
-import { useGameStore, useTagStore, usePlayLogStore, SYSTEM_TAG_IDS } from '../stores';
+import { useGameStore, useTagStore, usePlayLogStore, useSessionStore, SYSTEM_TAG_IDS } from '../stores';
 import IconButton from './ui/icon-button';
 import Badge from './ui/badge';
 import StarRating from './ui/star-rating';
@@ -11,17 +11,24 @@ import ComplexityDots from './ui/complexity-dots';
 import ConfirmDialog from './ui/confirm-dialog';
 import Button from './ui/button';
 import PlayLogEntry from './play-log-entry';
+import PlayLogDetail from './play-log-detail';
+import type { PlayLog } from '../types';
 
 interface GameDetailProps {
   game: BoardGame;
 }
+
+const spring = { type: 'spring' as const, damping: 30, stiffness: 300 };
 
 export default function GameDetail({ game }: GameDetailProps) {
   const navigate = useNavigate();
   const { deleteGame } = useGameStore();
   const { tags } = useTagStore();
   const { playLogs } = usePlayLogStore();
+  const { sessions } = useSessionStore();
   const [showDelete, setShowDelete] = useState(false);
+  const [playSheetOpen, setPlaySheetOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<PlayLog | null>(null);
 
   const gameTags = game.tagIds
     .filter((id) => id !== SYSTEM_TAG_IDS.NEW && id !== SYSTEM_TAG_IDS.NOT_PLAYED_RECENTLY)
@@ -37,9 +44,31 @@ export default function GameDetail({ game }: GameDetailProps) {
       .slice(0, 5);
   }, [playLogs, game.id]);
 
+  // Check for a paused session for this game
+  const pausedSession = useMemo(
+    () => sessions.find((s) => s.gameId === game.id),
+    [sessions, game.id]
+  );
+
   const handleDelete = () => {
     deleteGame(game.id);
     navigate('/', { replace: true });
+  };
+
+  const handleOpenScorekeeper = () => {
+    setPlaySheetOpen(false);
+    navigate(`/scorekeeper?gameId=${game.id}`);
+  };
+
+  const handleOpenQuickLog = () => {
+    setPlaySheetOpen(false);
+    navigate(`/game/${game.id}/log-play`);
+  };
+
+  const handleResumeSession = () => {
+    if (!pausedSession) return;
+    setPlaySheetOpen(false);
+    navigate(`/scorekeeper?gameId=${game.id}&sessionId=${pausedSession.id}`);
   };
 
   return (
@@ -67,14 +96,10 @@ export default function GameDetail({ game }: GameDetailProps) {
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto relative z-[1]">
         <div className="flex flex-col gap-5 px-4 pb-24">
-          {/* Hero image — rounded card */}
+          {/* Hero image */}
           {game.imageUrl ? (
             <div className="rounded-2xl overflow-hidden aspect-[16/9] depth-2">
-              <img
-                src={game.imageUrl}
-                alt={game.name}
-                className="w-full h-full object-cover"
-              />
+              <img src={game.imageUrl} alt={game.name} className="w-full h-full object-cover" />
             </div>
           ) : (
             <div className="rounded-2xl overflow-hidden aspect-[16/9] bg-surface flex items-center justify-center depth-2">
@@ -87,9 +112,7 @@ export default function GameDetail({ game }: GameDetailProps) {
           {/* Title + Rating */}
           <div>
             <div className="flex items-start gap-2">
-              <h1 className="text-2xl font-bold text-text-primary flex-1">
-                {game.name}
-              </h1>
+              <h1 className="text-2xl font-bold text-text-primary flex-1">{game.name}</h1>
               {isFavorite && <span className="text-danger text-xl mt-1">&#9829;</span>}
             </div>
             {game.rating !== null && (
@@ -106,7 +129,8 @@ export default function GameDetail({ game }: GameDetailProps) {
               <span className="text-sm">
                 {game.minPlayers === game.maxPlayers
                   ? `${game.minPlayers}`
-                  : `${game.minPlayers}–${game.maxPlayers}`} players
+                  : `${game.minPlayers}–${game.maxPlayers}`}{' '}
+                players
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-text-secondary">
@@ -118,21 +142,11 @@ export default function GameDetail({ game }: GameDetailProps) {
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex gap-2">
-            <Button onClick={() => navigate(`/game/${game.id}/log-play`)} className="flex-1">
-              <CalendarPlus size={18} />
-              Log Play
-            </Button>
-            <Button onClick={() => navigate(`/session/new?gameId=${game.id}`)} variant="secondary" className="flex-1">
-              <Timer size={18} />
-              Session
-            </Button>
-            <Button onClick={() => navigate(`/scorekeeper?gameId=${game.id}`)} variant="secondary" className="flex-1">
-              <Swords size={18} />
-              Score
-            </Button>
-          </div>
+          {/* Play button */}
+          <Button onClick={() => setPlaySheetOpen(true)} className="w-full">
+            <Play size={18} />
+            Play
+          </Button>
 
           {/* Tags */}
           {gameTags.length > 0 && (
@@ -149,9 +163,7 @@ export default function GameDetail({ game }: GameDetailProps) {
 
           {/* Description */}
           {game.description && (
-            <p className="text-sm text-text-secondary leading-relaxed">
-              {game.description}
-            </p>
+            <p className="text-sm text-text-secondary leading-relaxed">{game.description}</p>
           )}
 
           {/* Quick Rules Notes */}
@@ -178,14 +190,10 @@ export default function GameDetail({ game }: GameDetailProps) {
                 {game.expansions.map((exp) => (
                   <div key={exp.id} className="flex items-center gap-2">
                     <div
-                      className={`w-2 h-2 rounded-full ${
-                        exp.owned ? 'bg-primary' : 'bg-text-secondary/30'
-                      }`}
+                      className={`w-2 h-2 rounded-full ${exp.owned ? 'bg-primary' : 'bg-text-secondary/30'}`}
                     />
                     <span
-                      className={`text-sm ${
-                        exp.owned ? 'text-text-primary' : 'text-text-secondary line-through'
-                      }`}
+                      className={`text-sm ${exp.owned ? 'text-text-primary' : 'text-text-secondary line-through'}`}
                     >
                       {exp.name}
                     </span>
@@ -202,9 +210,7 @@ export default function GameDetail({ game }: GameDetailProps) {
                 <StickyNote size={16} className="text-primary" />
                 <span className="text-sm font-semibold text-text-primary">Notes</span>
               </div>
-              <p className="text-sm text-text-secondary whitespace-pre-wrap">
-                {game.notes}
-              </p>
+              <p className="text-sm text-text-secondary whitespace-pre-wrap">{game.notes}</p>
             </div>
           )}
 
@@ -214,13 +220,96 @@ export default function GameDetail({ game }: GameDetailProps) {
               <h2 className="text-sm font-semibold text-text-primary mb-3">Recent Plays</h2>
               <div className="flex flex-col gap-2">
                 {recentPlays.map((log) => (
-                  <PlayLogEntry key={log.id} log={log} showGameName={false} />
+                  <PlayLogEntry
+                    key={log.id}
+                    log={log}
+                    showGameName={false}
+                    onClick={() => setSelectedLog(log)}
+                  />
                 ))}
               </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Play Sheet */}
+      <AnimatePresence>
+        {playSheetOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
+              onClick={() => setPlaySheetOpen(false)}
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={spring}
+              className="fixed inset-x-0 bottom-0 z-50 glass-strong rounded-t-3xl px-4 pt-4 pb-[max(2rem,env(safe-area-inset-bottom))]"
+            >
+              <div className="flex justify-center mb-3">
+                <div className="w-10 h-1 rounded-full bg-text-secondary/30" />
+              </div>
+              <h2 className="text-lg font-bold text-text-primary mb-4">How do you want to play?</h2>
+
+              <div className="flex flex-col gap-3">
+                {/* Paused session — show prominently at top */}
+                {pausedSession && (
+                  <button
+                    onClick={handleResumeSession}
+                    className="flex items-center gap-3 rounded-2xl bg-primary/10 border border-primary/30 px-4 py-3 text-left transition-all active:scale-[0.98]"
+                  >
+                    <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-primary">Resume Paused Game</p>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        {pausedSession.playerNames.filter(Boolean).join(', ') || 'No players'} · Round {pausedSession.round}
+                      </p>
+                    </div>
+                  </button>
+                )}
+
+                <button
+                  onClick={handleOpenScorekeeper}
+                  className="flex items-center gap-3 rounded-2xl glass px-4 py-3 text-left transition-all active:scale-[0.98]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                    <Play size={20} className="text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-text-primary">Scorekeeper</p>
+                    <p className="text-xs text-text-secondary mt-0.5">Track scores live</p>
+                  </div>
+                </button>
+
+                <button
+                  onClick={handleOpenQuickLog}
+                  className="flex items-center gap-3 rounded-2xl glass px-4 py-3 text-left transition-all active:scale-[0.98]"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-surface flex items-center justify-center shrink-0">
+                    <Pencil size={20} className="text-text-secondary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-text-primary">Quick Log</p>
+                    <p className="text-xs text-text-secondary mt-0.5">Just record that you played</p>
+                  </div>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Play Log Detail sheet */}
+      <PlayLogDetail
+        log={selectedLog}
+        open={!!selectedLog}
+        onClose={() => setSelectedLog(null)}
+      />
 
       <ConfirmDialog
         open={showDelete}
