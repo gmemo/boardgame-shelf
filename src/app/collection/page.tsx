@@ -156,6 +156,15 @@ export default function CollectionPage() {
           <h1 className="text-xl font-bold text-text-primary">Collection</h1>
           <div className="flex items-center gap-3">
             <span className="text-xs text-text-secondary">{filteredGames.length} games</span>
+            {/* Select mode button — before the sort button */}
+            {!selectMode && (
+              <button
+                onClick={() => setSelectMode(true)}
+                className="text-xs font-medium text-text-secondary glass-pill px-3 py-1.5 rounded-full hover:text-text-primary transition-colors"
+              >
+                Select
+              </button>
+            )}
             <div className="relative">
               <button
                 onClick={() => setShowSort(!showSort)}
