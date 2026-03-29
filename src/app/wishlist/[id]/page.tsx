@@ -114,17 +114,17 @@ export default function WishlistDetailPage() {
           )}
 
           {/* Game details section */}
-          {(item.minPlayers != null || item.playTimeMinutes != null || item.complexity != null) && (
+          {(item.minPlayers != null || item.maxPlayers != null || item.playTimeMinutes != null || item.complexity != null) && (
             <div className="glass rounded-2xl p-4 flex flex-col gap-3">
               <h2 className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Game Details</h2>
               <div className="flex flex-wrap gap-4">
-                {item.minPlayers != null && (
+                {(item.minPlayers != null || item.maxPlayers != null) && (
                   <div>
                     <p className="text-[10px] text-text-secondary">Players</p>
                     <p className="text-sm font-semibold text-text-primary">
                       {item.minPlayers === item.maxPlayers
                         ? item.minPlayers
-                        : `${item.minPlayers}–${item.maxPlayers ?? '?'}`}
+                        : `${item.minPlayers ?? '?'}–${item.maxPlayers ?? '?'}`}
                     </p>
                   </div>
                 )}

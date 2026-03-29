@@ -270,7 +270,7 @@ export default function WishlistItemForm({ item }: WishlistItemFormProps) {
       </div>
 
       {/* Sticky Save */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 glass-strong z-10">
+      <div className="fixed bottom-0 left-0 right-0 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] glass-strong z-10">
         <Button className="w-full" size="lg" onClick={handleSave} disabled={!name.trim()}>
           {isEdit ? 'Save Changes' : 'Add to Wishlist'}
         </Button>
