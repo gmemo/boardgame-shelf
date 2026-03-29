@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, Plus, X } from 'lucide-react';
+import { useScrollLock } from '../../lib/use-scroll-lock';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore, usePlayLogStore, useSessionStore, usePlayerStore } from '../../stores';
 import type { ScoreCategory, PlayerScore } from '../../types';
@@ -49,8 +50,6 @@ export default function ScorekeeperPage() {
     }
     return {};
   });
-  const [round, setRound] = useState(() => existingSession?.round ?? 1);
-
   // Player colors — track which player names came from player store
   const [playerColors, setPlayerColors] = useState<Record<string, string>>({});
 
@@ -58,6 +57,8 @@ export default function ScorekeeperPage() {
   const [addCategorySheetOpen, setAddCategorySheetOpen] = useState(false);
   const [addPlayerSheetOpen, setAddPlayerSheetOpen] = useState(false);
   const [endSheetOpen, setEndSheetOpen] = useState(false);
+
+  useScrollLock(addCategorySheetOpen || addPlayerSheetOpen || endSheetOpen);
 
   // End game state
   const [winnerName, setWinnerName] = useState<string | null>(null);
@@ -241,7 +242,7 @@ export default function ScorekeeperPage() {
       playerNames: validPlayerNames,
       categories,
       playerScores: buildPlayerScores(),
-      round,
+      round: 1,
       notes: '',
     };
     if (sessionId && existingSession) {
@@ -297,22 +298,6 @@ export default function ScorekeeperPage() {
         <h1 className="flex-1 text-center text-base font-semibold text-text-primary truncate">
           {game?.name ?? 'Scorekeeper'}
         </h1>
-        {/* Round counter */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setRound((r) => Math.max(1, r - 1))}
-            className="w-7 h-7 rounded-full glass flex items-center justify-center text-text-secondary active:scale-90 transition-all"
-          >
-            −
-          </button>
-          <span className="text-sm font-bold text-text-primary w-12 text-center">Rd {round}</span>
-          <button
-            onClick={() => setRound((r) => r + 1)}
-            className="w-7 h-7 rounded-full glass flex items-center justify-center text-text-secondary active:scale-90 transition-all"
-          >
-            <Plus size={14} />
-          </button>
-        </div>
       </div>
 
       {/* Player cards area */}
