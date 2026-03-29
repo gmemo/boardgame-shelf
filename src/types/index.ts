@@ -39,12 +39,32 @@ export interface PlaySession {
   id: string;
   gameId: string;
   date: string;
+  playerNames: string[];
   playerIds: string[];
+  winnerName: string | null;
   winnerId: string | null;
   duration: number | null;
   notes: string;
   scores: Record<string, number>;
+  status: 'active' | 'completed' | 'abandoned';
+  sessionNumber: number | null;
+  chapter: string;
   createdAt: string;
+  updatedAt: string;
+}
+
+export interface WishlistItem {
+  id: string;
+  name: string;
+  type: 'game' | 'expansion';
+  linkedGameId: string | null;
+  price: string;
+  store: string;
+  link: string;
+  notes: string;
+  tagIds: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PlayLog {

@@ -2,9 +2,12 @@ import { useGameStore } from '../stores/game-store';
 import { useTagStore } from '../stores/tag-store';
 import { usePlayLogStore } from '../stores/play-log-store';
 import { usePreferencesStore } from '../stores/preferences-store';
-import type { BoardGame, Tag, PlayLog, UserPreferences } from '../types';
+import { useSessionStore } from '../stores/session-store';
+import { useWishlistStore } from '../stores/wishlist-store';
+import { usePlayerStore } from '../stores/player-store';
+import type { BoardGame, Tag, PlayLog, UserPreferences, PlaySession, WishlistItem, Player } from '../types';
 
-interface BackupData {
+interface BackupDataV1 {
   version: 1;
   exportedAt: string;
   games: BoardGame[];
@@ -13,13 +16,30 @@ interface BackupData {
   preferences: UserPreferences;
 }
 
+interface BackupDataV2 {
+  version: 2;
+  exportedAt: string;
+  games: BoardGame[];
+  tags: Tag[];
+  playLogs: PlayLog[];
+  sessions: PlaySession[];
+  wishlistItems: WishlistItem[];
+  players: Player[];
+  preferences: UserPreferences;
+}
+
+type BackupData = BackupDataV1 | BackupDataV2;
+
 export function exportData() {
-  const data: BackupData = {
-    version: 1,
+  const data: BackupDataV2 = {
+    version: 2,
     exportedAt: new Date().toISOString(),
     games: useGameStore.getState().games,
     tags: useTagStore.getState().tags,
     playLogs: usePlayLogStore.getState().playLogs,
+    sessions: useSessionStore.getState().sessions,
+    wishlistItems: useWishlistStore.getState().items,
+    players: usePlayerStore.getState().players,
     preferences: usePreferencesStore.getState().preferences,
   };
 
@@ -75,5 +95,16 @@ export function applyImportData(data: BackupData) {
   usePlayLogStore.getState().setPlayLogs(data.playLogs);
   if (data.preferences) {
     usePreferencesStore.getState().setPreferences(data.preferences);
+  }
+  if (data.version === 2) {
+    if (Array.isArray(data.sessions)) {
+      useSessionStore.getState().setSessions(data.sessions);
+    }
+    if (Array.isArray(data.wishlistItems)) {
+      useWishlistStore.getState().setItems(data.wishlistItems);
+    }
+    if (Array.isArray(data.players)) {
+      usePlayerStore.getState().setPlayers(data.players);
+    }
   }
 }

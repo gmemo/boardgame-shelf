@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Moon, Sun, Download, Upload, Check, Heart, Sparkles } from 'lucide-react';
+import { Moon, Sun, Download, Upload, Check, Heart, Plus, Pencil, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePreferencesStore } from '../../stores';
+import { usePreferencesStore, usePlayerStore } from '../../stores';
 import ToggleGroup from '../../components/ui/toggle-group';
 import ConfirmDialog from '../../components/ui/confirm-dialog';
 import { exportData, pickAndParseImportFile, applyImportData } from '../../lib/export-import';
+import type { Player } from '../../types';
 
 const THRESHOLD_PRESETS = [
   { label: '30d', value: 30 },
@@ -22,6 +23,17 @@ const ACCENT_COLORS = [
   { value: 'purple', color: '#7C3AED' },
 ];
 
+const PLAYER_COLORS = [
+  '#EF4444',
+  '#3B82F6',
+  '#10B981',
+  '#EAB308',
+  '#F97316',
+  '#7C3AED',
+  '#EC4899',
+  '#14B8A6',
+];
+
 const THEME_OPTIONS = [
   { value: 'dark' as const, label: 'Dark', icon: <Moon size={16} /> },
   { value: 'light' as const, label: 'Light', icon: <Sun size={16} /> },
@@ -29,11 +41,22 @@ const THEME_OPTIONS = [
 
 export default function SettingsPage() {
   const { preferences, setPreferences } = usePreferencesStore();
+  const { players, addPlayer, updatePlayer, deletePlayer } = usePlayerStore();
+
   const [importConfirmOpen, setImportConfirmOpen] = useState(false);
   const [pendingImport, setPendingImport] = useState<Parameters<
     typeof applyImportData
   >[0] | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
+
+  // Player state
+  const [addingPlayer, setAddingPlayer] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState('');
+  const [newPlayerColor, setNewPlayerColor] = useState(PLAYER_COLORS[0]);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editColor, setEditColor] = useState('');
+  const [deletePlayerTarget, setDeletePlayerTarget] = useState<Player | null>(null);
 
   const handleImport = async () => {
     setImportError(null);
@@ -51,6 +74,27 @@ export default function SettingsPage() {
       applyImportData(pendingImport);
       setPendingImport(null);
     }
+  };
+
+  const handleAddPlayer = () => {
+    const name = newPlayerName.trim();
+    if (!name) return;
+    addPlayer({ name, color: newPlayerColor });
+    setNewPlayerName('');
+    setNewPlayerColor(PLAYER_COLORS[0]);
+    setAddingPlayer(false);
+  };
+
+  const startEdit = (player: Player) => {
+    setEditingPlayer(player);
+    setEditName(player.name);
+    setEditColor(player.color);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingPlayer || !editName.trim()) return;
+    updatePlayer(editingPlayer.id, { name: editName.trim(), color: editColor });
+    setEditingPlayer(null);
   };
 
   return (
@@ -140,6 +184,138 @@ export default function SettingsPage() {
           </div>
         </section>
 
+        {/* Players */}
+        <section className="glass rounded-2xl p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold text-text-primary">Players</h2>
+            <button
+              onClick={() => {
+                setAddingPlayer(true);
+                setEditingPlayer(null);
+              }}
+              className="flex items-center gap-1 text-xs text-primary font-medium"
+            >
+              <Plus size={14} />
+              Add
+            </button>
+          </div>
+
+          {/* Add player form */}
+          {addingPlayer && (
+            <div className="mb-4 flex flex-col gap-3 glass-light rounded-xl p-3">
+              <input
+                type="text"
+                placeholder="Player name"
+                value={newPlayerName}
+                onChange={(e) => setNewPlayerName(e.target.value)}
+                autoFocus
+                className="w-full bg-transparent glass-input rounded-lg px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary/50 focus:outline-none"
+              />
+              <div className="flex gap-2 flex-wrap">
+                {PLAYER_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => setNewPlayerColor(color)}
+                    className="w-7 h-7 rounded-full transition-transform"
+                    style={{
+                      backgroundColor: color,
+                      transform: newPlayerColor === color ? 'scale(1.2)' : 'scale(1)',
+                      outline: newPlayerColor === color ? `2px solid ${color}` : 'none',
+                      outlineOffset: '2px',
+                    }}
+                  />
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setAddingPlayer(false)}
+                  className="flex-1 text-xs text-text-secondary py-2 rounded-lg glass-pill"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddPlayer}
+                  disabled={!newPlayerName.trim()}
+                  className="flex-1 text-xs text-white py-2 rounded-lg bg-primary disabled:opacity-50"
+                >
+                  Add Player
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Player list */}
+          <div className="flex flex-col gap-2">
+            {players.length === 0 && !addingPlayer && (
+              <p className="text-xs text-text-secondary">No players yet. Add one above.</p>
+            )}
+            {players.map((player) => (
+              <div key={player.id}>
+                {editingPlayer?.id === player.id ? (
+                  <div className="flex flex-col gap-2 glass-light rounded-xl p-3">
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      autoFocus
+                      className="w-full bg-transparent glass-input rounded-lg px-3 py-2 text-sm text-text-primary focus:outline-none"
+                    />
+                    <div className="flex gap-2 flex-wrap">
+                      {PLAYER_COLORS.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => setEditColor(color)}
+                          className="w-7 h-7 rounded-full transition-transform"
+                          style={{
+                            backgroundColor: color,
+                            transform: editColor === color ? 'scale(1.2)' : 'scale(1)',
+                            outline: editColor === color ? `2px solid ${color}` : 'none',
+                            outlineOffset: '2px',
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setEditingPlayer(null)}
+                        className="flex-1 text-xs text-text-secondary py-2 rounded-lg glass-pill"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveEdit}
+                        className="flex-1 text-xs text-white py-2 rounded-lg bg-primary"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="w-3 h-3 rounded-full shrink-0"
+                      style={{ backgroundColor: player.color }}
+                    />
+                    <span className="text-sm text-text-primary flex-1">{player.name}</span>
+                    <button
+                      onClick={() => startEdit(player)}
+                      className="text-text-secondary/40 hover:text-text-secondary transition-colors"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button
+                      onClick={() => setDeletePlayerTarget(player)}
+                      className="text-text-secondary/40 hover:text-danger transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* Data */}
         <section className="glass rounded-2xl overflow-hidden">
           <h2 className="text-sm font-semibold text-text-primary px-4 pt-4 pb-3">
@@ -177,34 +353,6 @@ export default function SettingsPage() {
           {importError && (
             <p className="text-xs text-danger px-4 pb-3">{importError}</p>
           )}
-        </section>
-
-        {/* Coming Soon */}
-        <section className="glass rounded-2xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles size={16} className="text-primary" />
-            <h2 className="text-sm font-semibold text-text-primary">
-              Coming Soon
-            </h2>
-          </div>
-          <ul className="space-y-2 text-sm text-text-secondary">
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5">&#8226;</span>
-              Player profiles with avatars and win/loss stats
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5">&#8226;</span>
-              Game night planner with smart suggestions
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5">&#8226;</span>
-              Charts and insights in the stats tab
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-primary mt-0.5">&#8226;</span>
-              BGG import to quickly populate your collection
-            </li>
-          </ul>
         </section>
 
         {/* About + Support */}
@@ -251,7 +399,7 @@ export default function SettingsPage() {
           </p>
         </div>
         <p className="text-xs text-text-secondary text-center pb-2">
-          Meeply v0.1.0
+          Meeply v0.2.0
         </p>
       </div>
 
@@ -263,6 +411,17 @@ export default function SettingsPage() {
         confirmLabel="Import"
         confirmVariant="primary"
         onConfirm={confirmImport}
+      />
+
+      <ConfirmDialog
+        open={!!deletePlayerTarget}
+        onOpenChange={(open) => { if (!open) setDeletePlayerTarget(null); }}
+        title={`Delete ${deletePlayerTarget?.name ?? 'player'}?`}
+        description="This will permanently remove this player."
+        onConfirm={() => {
+          if (deletePlayerTarget) deletePlayer(deletePlayerTarget.id);
+          setDeletePlayerTarget(null);
+        }}
       />
     </div>
   );

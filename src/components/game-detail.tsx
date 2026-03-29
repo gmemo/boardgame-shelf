@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, CalendarPlus } from 'lucide-react';
+import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, CalendarPlus, Timer, Swords } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { BoardGame } from '../types';
 import { useGameStore, useTagStore, usePlayLogStore, SYSTEM_TAG_IDS } from '../stores';
@@ -118,14 +118,21 @@ export default function GameDetail({ game }: GameDetailProps) {
             </div>
           </div>
 
-          {/* Log Play Button */}
-          <Button
-            onClick={() => navigate(`/game/${game.id}/log-play`)}
-            className="w-full"
-          >
-            <CalendarPlus size={18} />
-            Log Play
-          </Button>
+          {/* Action buttons */}
+          <div className="flex gap-2">
+            <Button onClick={() => navigate(`/game/${game.id}/log-play`)} className="flex-1">
+              <CalendarPlus size={18} />
+              Log Play
+            </Button>
+            <Button onClick={() => navigate(`/session/new?gameId=${game.id}`)} variant="secondary" className="flex-1">
+              <Timer size={18} />
+              Session
+            </Button>
+            <Button onClick={() => navigate(`/scorekeeper?gameId=${game.id}`)} variant="secondary" className="flex-1">
+              <Swords size={18} />
+              Score
+            </Button>
+          </div>
 
           {/* Tags */}
           {gameTags.length > 0 && (
