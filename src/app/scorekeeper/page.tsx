@@ -192,6 +192,7 @@ export default function ScorekeeperPage() {
     setScores((prev) => {
       const next: Record<string, Record<string, number>> = {};
       for (const [pName, catScores] of Object.entries(prev)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [id]: _removed, ...rest } = catScores;
         next[pName] = rest;
       }
