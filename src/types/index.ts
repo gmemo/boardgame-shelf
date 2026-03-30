@@ -64,12 +64,19 @@ export interface WishlistItem {
   name: string;
   type: 'game' | 'expansion';
   linkedGameId: string | null;
+  imageUrl: string | null;
+  // Optional game fields (null = not set)
+  minPlayers: number | null;
+  maxPlayers: number | null;
+  playTimeMinutes: number | null;
+  complexity: (1 | 2 | 3 | 4 | 5) | null;
+  tagIds: string[];
+  notes: string;
+  quickRulesNotes: string;
+  // Wishlist-specific optional
   price: string;
   store: string;
   link: string;
-  notes: string;
-  tagIds: string[];
-  imageUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }

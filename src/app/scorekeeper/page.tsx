@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, Plus, X, Minus } from 'lucide-react';
+import { ChevronLeft, Plus, X } from 'lucide-react';
+import { useScrollLock } from '../../lib/use-scroll-lock';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useGameStore, usePlayLogStore, useSessionStore, usePlayerStore } from '../../stores';
 import type { ScoreCategory, PlayerScore } from '../../types';
@@ -49,8 +50,6 @@ export default function ScorekeeperPage() {
     }
     return {};
   });
-  const [round, setRound] = useState(() => existingSession?.round ?? 1);
-
   // Player colors — track which player names came from player store
   const [playerColors, setPlayerColors] = useState<Record<string, string>>({});
 
@@ -58,6 +57,8 @@ export default function ScorekeeperPage() {
   const [addCategorySheetOpen, setAddCategorySheetOpen] = useState(false);
   const [addPlayerSheetOpen, setAddPlayerSheetOpen] = useState(false);
   const [endSheetOpen, setEndSheetOpen] = useState(false);
+
+  useScrollLock(addCategorySheetOpen || addPlayerSheetOpen || endSheetOpen);
 
   // End game state
   const [winnerName, setWinnerName] = useState<string | null>(null);
@@ -192,6 +193,7 @@ export default function ScorekeeperPage() {
     setScores((prev) => {
       const next: Record<string, Record<string, number>> = {};
       for (const [pName, catScores] of Object.entries(prev)) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { [id]: _removed, ...rest } = catScores;
         next[pName] = rest;
       }
@@ -211,16 +213,6 @@ export default function ScorekeeperPage() {
       );
     }
     setEditingCategoryId(null);
-  };
-
-  const cycleIncrement = (categoryId: string, current: number) => {
-    const idx = INCREMENT_PRESETS.indexOf(current);
-    const next = idx === -1 || idx === INCREMENT_PRESETS.length - 1
-      ? INCREMENT_PRESETS[0]
-      : INCREMENT_PRESETS[idx + 1];
-    setCategories((prev) =>
-      prev.map((c) => (c.id === categoryId ? { ...c, increment: next } : c))
-    );
   };
 
   // Row color tint from player's registered color
@@ -250,7 +242,7 @@ export default function ScorekeeperPage() {
       playerNames: validPlayerNames,
       categories,
       playerScores: buildPlayerScores(),
-      round,
+      round: 1,
       notes: '',
     };
     if (sessionId && existingSession) {
@@ -306,28 +298,12 @@ export default function ScorekeeperPage() {
         <h1 className="flex-1 text-center text-base font-semibold text-text-primary truncate">
           {game?.name ?? 'Scorekeeper'}
         </h1>
-        {/* Round counter */}
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => setRound((r) => Math.max(1, r - 1))}
-            className="w-7 h-7 rounded-full glass flex items-center justify-center text-text-secondary active:scale-90 transition-all"
-          >
-            <Minus size={14} />
-          </button>
-          <span className="text-sm font-bold text-text-primary w-12 text-center">Rd {round}</span>
-          <button
-            onClick={() => setRound((r) => r + 1)}
-            className="w-7 h-7 rounded-full glass flex items-center justify-center text-text-secondary active:scale-90 transition-all"
-          >
-            <Plus size={14} />
-          </button>
-        </div>
       </div>
 
-      {/* Table area */}
-      <div className="flex-1 flex flex-col overflow-hidden relative z-[1]">
-        {/* Table controls row */}
-        <div className="px-3 py-2 flex items-center justify-between shrink-0">
+      {/* Player cards area */}
+      <div className="flex-1 overflow-y-auto relative z-[1] px-3 pb-4">
+        {/* Controls row */}
+        <div className="py-2 flex items-center justify-between">
           <span className="text-xs text-text-secondary">
             {categories.length} {categories.length === 1 ? 'category' : 'categories'}
           </span>
@@ -339,94 +315,49 @@ export default function ScorekeeperPage() {
           </button>
         </div>
 
-        {/* Scrollable table wrapper */}
-        <div className="flex-1 overflow-auto">
-          <table className="min-w-max w-full border-collapse">
-            <thead className="sticky top-0 z-10 bg-[var(--glass-bg)] backdrop-blur-2xl">
-              <tr>
-                {/* Player column header */}
-                <th className="sticky left-0 z-20 bg-[var(--glass-bg)] backdrop-blur-2xl min-w-[120px] px-3 py-2 text-left text-xs font-semibold text-text-secondary uppercase">
-                  Player
-                </th>
-                {/* Category headers */}
-                {categories.map((cat) => (
-                  <th
-                    key={cat.id}
-                    className="min-w-[90px] px-2 py-2 text-center align-top"
-                  >
-                    <div className="flex flex-col items-center gap-1">
-                      <div className="flex items-center gap-1 justify-center w-full">
-                        {editingCategoryId === cat.id ? (
-                          <input
-                            type="text"
-                            value={editingCategoryName}
-                            onChange={(e) => setEditingCategoryName(e.target.value)}
-                            onBlur={commitCategoryName}
-                            onKeyDown={(e) => e.key === 'Enter' && commitCategoryName()}
-                            autoFocus
-                            className="w-full text-xs font-semibold text-text-primary bg-transparent focus:outline-none border-b border-primary text-center"
-                          />
-                        ) : (
-                          <button
-                            onClick={() => startEditCategoryName(cat)}
-                            className="text-xs font-semibold text-text-primary truncate max-w-[70px]"
-                          >
-                            {cat.name}
-                          </button>
-                        )}
-                        {categories.length > 1 && (
-                          <button
-                            onClick={() => deleteCategory(cat.id)}
-                            className="text-text-secondary/40 hover:text-danger transition-colors shrink-0"
-                          >
-                            <X size={10} />
-                          </button>
-                        )}
-                      </div>
-                      {/* Increment badge */}
-                      <button
-                        onClick={() => cycleIncrement(cat.id, cat.increment)}
-                        className="text-[10px] font-medium glass-pill px-1.5 py-0.5 rounded-full text-text-secondary"
-                      >
-                        ×{cat.increment}
-                      </button>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {playerNames.map((playerName, idx) => (
-                <tr key={idx} className="border-t border-white/5" style={{ backgroundColor: rowBg(playerName, 0.07) }}>
-                  {/* Player name cell — sticky left */}
-                  <td className="sticky left-0 z-10 backdrop-blur-2xl px-2 py-3" style={{ backgroundColor: rowBg(playerName, 0.25) ?? 'var(--glass-bg)' }}>
-                    <div className="flex items-center gap-1">
-                      {/* Color dot */}
-                      <span
-                        className="inline-block w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: playerColors[playerName] ?? 'rgba(128,128,128,0.4)' }}
-                      />
-                      {/* Name input */}
-                      <input
-                        type="text"
-                        placeholder={`Player ${idx + 1}`}
-                        value={playerName}
-                        onChange={(e) => updatePlayerName(idx, e.target.value)}
-                        className="bg-transparent text-base font-medium text-text-primary focus:outline-none w-[80px] placeholder:text-text-secondary/50"
-                      />
-                      {/* Remove */}
-                      {playerNames.length > 1 && (
-                        <button
-                          onClick={() => removePlayer(idx)}
-                          className="ml-0.5 text-text-secondary/50 hover:text-danger transition-colors shrink-0"
-                        >
-                          <X size={12} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
+        <div className="flex flex-col gap-3">
+          {playerNames.map((playerName, idx) => {
+            const total = categories.reduce(
+              (sum, cat) => sum + getScore(playerName, cat.id),
+              0
+            );
+            return (
+              <div
+                key={idx}
+                className="glass rounded-2xl overflow-hidden"
+                style={{ borderLeft: playerColors[playerName] ? `3px solid ${playerColors[playerName]}` : undefined }}
+              >
+                {/* Player header */}
+                <div
+                  className="flex items-center gap-2 px-4 py-3"
+                  style={{ backgroundColor: rowBg(playerName, 0.1) }}
+                >
+                  <span
+                    className="inline-block w-2.5 h-2.5 rounded-full shrink-0"
+                    style={{ backgroundColor: playerColors[playerName] ?? 'rgba(128,128,128,0.4)' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder={`Player ${idx + 1}`}
+                    value={playerName}
+                    onChange={(e) => updatePlayerName(idx, e.target.value)}
+                    className="flex-1 bg-transparent text-sm font-semibold text-text-primary focus:outline-none placeholder:text-text-secondary/50"
+                  />
+                  <span className="text-xs text-text-secondary shrink-0">
+                    Total: <span className="font-bold text-text-primary">{total}</span>
+                  </span>
+                  {playerNames.length > 1 && (
+                    <button
+                      onClick={() => removePlayer(idx)}
+                      className="text-text-secondary/50 hover:text-danger transition-colors shrink-0"
+                    >
+                      <X size={14} />
+                    </button>
+                  )}
+                </div>
 
-                  {/* Score cells */}
+                {/* Category rows */}
+                <div className="divide-y divide-white/5">
                   {categories.map((cat) => {
                     const score = getScore(playerName, cat.id);
                     const isEditing =
@@ -434,18 +365,51 @@ export default function ScorekeeperPage() {
                       editingScore?.categoryId === cat.id;
 
                     return (
-                      <td key={cat.id} className="px-2 py-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                      <div key={cat.id} className="flex items-center gap-3 px-4 py-2">
+                        {/* Category name */}
+                        <div className="flex-1 min-w-0">
+                          {editingCategoryId === cat.id ? (
+                            <input
+                              type="text"
+                              value={editingCategoryName}
+                              onChange={(e) => setEditingCategoryName(e.target.value)}
+                              onBlur={commitCategoryName}
+                              onKeyDown={(e) => e.key === 'Enter' && commitCategoryName()}
+                              autoFocus
+                              className="text-xs font-medium text-text-primary bg-transparent focus:outline-none border-b border-primary w-full"
+                            />
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => startEditCategoryName(cat)}
+                                className="text-xs font-medium text-text-secondary truncate"
+                              >
+                                {cat.name}
+                              </button>
+                              {categories.length > 1 && (
+                                <button
+                                  onClick={() => deleteCategory(cat.id)}
+                                  className="text-text-secondary/30 hover:text-danger transition-colors shrink-0"
+                                >
+                                  <X size={10} />
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Controls */}
+                        <div className="flex items-center gap-2 shrink-0">
                           <button
                             onClick={() => changeScore(playerName, cat.id, -cat.increment)}
-                            className="w-6 h-6 rounded-full glass-pill flex items-center justify-center text-text-secondary active:scale-90 transition-all shrink-0"
+                            className="w-11 h-11 rounded-full glass-pill flex items-center justify-center text-text-secondary active:scale-90 transition-all text-lg font-medium"
                           >
                             −
                           </button>
                           {isEditing ? (
                             <input
                               type="number"
-                              className="glass-input rounded-lg w-16 text-center text-base font-bold text-text-primary focus:outline-none py-0.5"
+                              className="glass-input rounded-lg w-16 text-center text-base font-bold text-text-primary focus:outline-none py-1"
                               autoFocus
                               value={editingScoreValue}
                               onChange={(e) => setEditingScoreValue(e.target.value)}
@@ -468,38 +432,33 @@ export default function ScorekeeperPage() {
                                 setEditingScore({ playerName, categoryId: cat.id });
                                 setEditingScoreValue(String(score));
                               }}
-                              className="min-w-[40px] text-center font-bold text-text-primary text-base"
+                              className="w-16 text-center font-bold text-text-primary text-base"
                             >
                               {score}
                             </button>
                           )}
                           <button
                             onClick={() => changeScore(playerName, cat.id, cat.increment)}
-                            className="w-6 h-6 rounded-full glass-pill flex items-center justify-center text-text-secondary active:scale-90 transition-all shrink-0"
+                            className="w-11 h-11 rounded-full glass-pill flex items-center justify-center text-text-secondary active:scale-90 transition-all text-lg font-medium"
                           >
                             +
                           </button>
                         </div>
-                      </td>
+                      </div>
                     );
                   })}
+                </div>
+              </div>
+            );
+          })}
 
-                </tr>
-              ))}
-
-              {/* Add player row */}
-              <tr>
-                <td colSpan={categories.length + 1} className="px-3 py-2">
-                  <button
-                    onClick={() => setAddPlayerSheetOpen(true)}
-                    className="flex items-center gap-1.5 text-sm text-primary glass-pill px-3 py-1.5 rounded-full"
-                  >
-                    <Plus size={14} /> Add Player
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+          {/* Add Player */}
+          <button
+            onClick={() => setAddPlayerSheetOpen(true)}
+            className="flex items-center gap-1.5 text-sm text-primary glass-pill px-4 py-3 rounded-2xl w-full justify-center"
+          >
+            <Plus size={16} /> Add Player
+          </button>
         </div>
       </div>
 

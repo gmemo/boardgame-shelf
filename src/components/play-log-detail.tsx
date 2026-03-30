@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Pencil, Trash2, Trophy, Clock, Users } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Pencil, Trash2, Trophy, Clock, Users, Share2 } from 'lucide-react';
+import ShareCard from './share-card';
+import { generateShareImage, shareImage } from '../lib/share-image';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { PlayLog } from '../types';
 import { usePlayLogStore, useGameStore } from '../stores';
@@ -34,6 +36,22 @@ export default function PlayLogDetail({ log, open, onClose }: PlayLogDetailProps
   const [editNotes, setEditNotes] = useState('');
 
   const game = log ? games.find((g) => g.id === log.gameId) : undefined;
+
+  const shareCardRef = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
+
+  const handleShare = async () => {
+    if (!shareCardRef.current || sharing) return;
+    setSharing(true);
+    try {
+      const file = await generateShareImage(shareCardRef.current);
+      await shareImage(file);
+    } catch (e) {
+      console.error('Share failed', e);
+    } finally {
+      setSharing(false);
+    }
+  };
 
   const startEdit = () => {
     if (!log) return;
@@ -115,6 +133,13 @@ export default function PlayLogDetail({ log, open, onClose }: PlayLogDetailProps
                       <Pencil size={18} />
                     </button>
                   )}
+                  <button
+                    onClick={handleShare}
+                    disabled={sharing}
+                    className="p-2 text-text-secondary hover:text-primary transition-colors disabled:opacity-50"
+                  >
+                    <Share2 size={18} />
+                  </button>
                   <button
                     onClick={() => setShowDelete(true)}
                     className="p-2 text-text-secondary hover:text-danger transition-colors"
@@ -279,6 +304,11 @@ export default function PlayLogDetail({ log, open, onClose }: PlayLogDetailProps
                 </div>
               )}
             </motion.div>
+
+            {/* Offscreen share card — positioned offscreen so html-to-image can capture it */}
+            <div style={{ position: 'absolute', left: -9999, top: 0, visibility: 'hidden' }} aria-hidden="true">
+              <ShareCard ref={shareCardRef} variant="session" gameName={game?.name ?? ''} log={log} />
+            </div>
           </>
         )}
       </AnimatePresence>

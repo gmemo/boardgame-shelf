@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Moon, Sun, Download, Upload, Check, Heart, Plus, Pencil, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePreferencesStore, usePlayerStore } from '../../stores';
@@ -57,6 +57,7 @@ export default function SettingsPage() {
   const [editName, setEditName] = useState('');
   const [editColor, setEditColor] = useState('');
   const [deletePlayerTarget, setDeletePlayerTarget] = useState<Player | null>(null);
+  const colorInputRef = useRef<HTMLInputElement>(null);
 
   const handleImport = async () => {
     setImportError(null);
@@ -104,7 +105,7 @@ export default function SettingsPage() {
         <h1 className="text-xl font-bold text-text-primary">Settings</h1>
       </div>
 
-      <div className="flex flex-col gap-4 px-4 pb-8">
+      <div className="flex flex-col gap-4 px-4 pb-24">
         {/* Appearance */}
         <section className="glass rounded-2xl p-4">
           <h2 className="text-sm font-semibold text-text-primary mb-4">
@@ -120,6 +121,11 @@ export default function SettingsPage() {
               onChange={(theme) => setPreferences({ theme })}
               layoutId="theme-toggle"
             />
+            {preferences.theme === 'light' && (
+              <p className="text-xs text-text-secondary/60 italic mt-1 text-center">
+                why would anyone want light? are you ok?
+              </p>
+            )}
           </div>
 
           {/* Accent color */}
@@ -153,6 +159,33 @@ export default function SettingsPage() {
                   </AnimatePresence>
                 </button>
               ))}
+              {/* Custom swatch */}
+              <button
+                onClick={() => colorInputRef.current?.click()}
+                className="relative w-10 h-10 rounded-full transition-transform overflow-hidden"
+                style={{
+                  background: preferences.accentColor.startsWith('#')
+                    ? preferences.accentColor
+                    : 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)',
+                  transform: preferences.accentColor.startsWith('#') ? 'scale(1.15)' : 'scale(1)',
+                }}
+                title="Custom color"
+              >
+                {preferences.accentColor.startsWith('#') && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Check size={18} className="text-white drop-shadow" />
+                  </div>
+                )}
+              </button>
+              <input
+                ref={colorInputRef}
+                type="color"
+                className="sr-only"
+                value={
+                  preferences.accentColor.startsWith('#') ? preferences.accentColor : '#6366F1'
+                }
+                onChange={(e) => setPreferences({ accentColor: e.target.value })}
+              />
             </div>
           </div>
         </section>

@@ -17,6 +17,7 @@ import SessionNewPage from './app/session/new/page';
 import SessionDetailPage from './app/session/[id]/page';
 import SessionEditPage from './app/session/[id]/edit/page';
 import WishlistNewPage from './app/wishlist/new/page';
+import WishlistDetailPage from './app/wishlist/[id]/page';
 import WishlistEditPage from './app/wishlist/[id]/edit/page';
 import ScorekeeperPage from './app/scorekeeper/page';
 
@@ -26,7 +27,20 @@ function useApplyTheme() {
   useEffect(() => {
     const root = document.documentElement;
     root.setAttribute('data-theme', preferences.theme);
-    root.setAttribute('data-accent', preferences.accentColor);
+
+    const accentColor = preferences.accentColor;
+    if (accentColor.startsWith('#')) {
+      // Custom hex color: compute RGB components and set CSS var directly
+      const r = parseInt(accentColor.slice(1, 3), 16);
+      const g = parseInt(accentColor.slice(3, 5), 16);
+      const b = parseInt(accentColor.slice(5, 7), 16);
+      root.style.setProperty('--primary-rgb', `${r}, ${g}, ${b}`);
+      root.removeAttribute('data-accent');
+    } else {
+      // Named preset: use data-accent attribute (existing CSS handles the rest)
+      root.setAttribute('data-accent', accentColor);
+      root.style.removeProperty('--primary-rgb');
+    }
 
     const themeColor = preferences.theme === 'dark' ? '#0c0c10' : '#FAFAFA';
     document
@@ -67,6 +81,7 @@ function AppRoutes() {
       <Route path="/session/:id" element={<SessionDetailPage />} />
       <Route path="/session/:id/edit" element={<SessionEditPage />} />
       <Route path="/wishlist/new" element={<WishlistNewPage />} />
+      <Route path="/wishlist/:id" element={<WishlistDetailPage />} />
       <Route path="/wishlist/:id/edit" element={<WishlistEditPage />} />
       <Route path="/scorekeeper" element={<ScorekeeperPage />} />
       <Route path="/welcome" element={<Navigate to="/" replace />} />

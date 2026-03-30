@@ -1,6 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, Play, Gamepad2 } from 'lucide-react';
+import { ChevronLeft, Pencil, Trash2, Users, Clock, BookOpen, StickyNote, Puzzle, Play, Gamepad2, Share2 } from 'lucide-react';
+import ShareCard from './share-card';
+import { generateShareImage, shareImage } from '../lib/share-image';
 import type { BoardGame } from '../types';
 import { useGameStore, useTagStore, usePlayLogStore, useSessionStore, SYSTEM_TAG_IDS } from '../stores';
 import IconButton from './ui/icon-button';
@@ -26,6 +28,21 @@ export default function GameDetail({ game }: GameDetailProps) {
   const { sessions } = useSessionStore();
   const [showDelete, setShowDelete] = useState(false);
   const [selectedLog, setSelectedLog] = useState<PlayLog | null>(null);
+  const shareCardRef = useRef<HTMLDivElement>(null);
+  const [sharing, setSharing] = useState(false);
+
+  const handleShare = async () => {
+    if (!shareCardRef.current || sharing) return;
+    setSharing(true);
+    try {
+      const file = await generateShareImage(shareCardRef.current);
+      await shareImage(file);
+    } catch (e) {
+      console.error('Share failed', e);
+    } finally {
+      setSharing(false);
+    }
+  };
 
   const gameTags = game.tagIds
     .filter((id) => id !== SYSTEM_TAG_IDS.NEW && id !== SYSTEM_TAG_IDS.NOT_PLAYED_RECENTLY)
@@ -65,6 +82,13 @@ export default function GameDetail({ game }: GameDetailProps) {
           <ChevronLeft size={24} />
         </IconButton>
         <div className="flex gap-1">
+          <button
+            onClick={handleShare}
+            disabled={sharing}
+            className="text-text-secondary hover:text-text-primary transition-colors disabled:opacity-50"
+          >
+            <Share2 size={20} />
+          </button>
           <IconButton onClick={() => navigate(`/game/${game.id}/edit`)}>
             <Pencil size={18} />
           </IconButton>
@@ -256,6 +280,11 @@ export default function GameDetail({ game }: GameDetailProps) {
         description="This will permanently remove this game and all its data. This cannot be undone."
         onConfirm={handleDelete}
       />
+
+      {/* Offscreen share card — not visible to user */}
+      <div style={{ position: 'absolute', left: -9999, top: 0, visibility: 'hidden' }} aria-hidden="true">
+        <ShareCard ref={shareCardRef} variant="game" game={game} />
+      </div>
     </motion.div>
   );
 }

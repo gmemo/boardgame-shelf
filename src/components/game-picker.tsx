@@ -3,6 +3,7 @@ import { X, Search } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import type { BoardGame } from '../types';
 import { useGameStore } from '../stores';
+import { useScrollLock } from '../lib/use-scroll-lock';
 
 interface GamePickerProps {
   open: boolean;
@@ -13,6 +14,7 @@ interface GamePickerProps {
 export default function GamePicker({ open, onClose, onSelect }: GamePickerProps) {
   const { games } = useGameStore();
   const [search, setSearch] = useState('');
+  useScrollLock(open);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
